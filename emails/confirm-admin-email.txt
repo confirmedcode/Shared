@@ -1,0 +1,7 @@
+Hello,
+
+Click this link to complete your Confirmed Admin signup:
+{{ confirmemailurl }}
+
+Thanks,
+Team Confirmed

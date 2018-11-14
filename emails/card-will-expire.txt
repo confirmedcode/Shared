@@ -1,0 +1,7 @@
+Hello,
+
+Your payment method on Confirmed VPN is expiring soon. If this is not updated, billing will fail and your subscription to Confirmed VPN will be cancelled. Please update your payment method by signing in below:
+
+{{ signinurl }}
+
+- Team Confirmed

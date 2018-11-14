@@ -1,0 +1,9 @@
+Hello,
+
+Want to use Confirmed VPN for free? Get a recurring 10% discount for every friend you refer to an active subscription -- you can get up to 100% off. Your friends will also get 10% off.
+
+Your Referral Link:
+
+{{referralurl}}
+
+- Team Confirmed

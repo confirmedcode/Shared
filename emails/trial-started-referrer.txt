@@ -1,0 +1,9 @@
+Hello,
+
+You're on your way to earning a monthly or annual credit bonus for Confirmed VPN because the email you referred, {{referredEmail}}, just signed up for a trial of Confirmed VPN. If they continue using Confirmed VPN after their trial, you'll get 10% off your subscription. There's no limit to how many people you can refer for free recurring discounts. Refer ten monthly subscriptions and you'll use Confirmed for free!
+
+Check the status of your referrals below:
+
+{{ signinurl }}
+
+- Team Confirmed

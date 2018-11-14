@@ -1,0 +1,18 @@
+Hello,
+
+A member of our customer support staff at Confirmed VPN
+has taken the action described below on your account.
+Here at Confirmed, we treat your privacy with the utmost respect,
+and these notification emails ensure that not even our employees
+can access any of your data without you being alerted.
+If you recently contacted our support team and you recognize these actions,
+you can disregard this email.
+
+Action: {{ action }}
+Reason: {{ reason }}
+
+Please don't hesitate to ask us any questions.
+You can respond directly to this email.
+
+Thanks,
+Team Confirmed

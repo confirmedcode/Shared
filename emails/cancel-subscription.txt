@@ -1,0 +1,8 @@
+Hello,
+
+Your subscription to Confirmed VPN has been cancelled and you will no longer be billed.
+You can click the following to restart your subscription.
+{{ signinurl }}
+
+Thanks,
+Team Confirmed

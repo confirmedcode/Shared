@@ -1,0 +1,7 @@
+Hello,
+
+Your payment method on Confirmed VPN has failed. If this is not updated, your subscription will be cancelled and your internet will no longer be protected by Confirmed VPN. Please update your payment method by signing in below:
+
+{{ signinurl }}
+
+- Team Confirmed

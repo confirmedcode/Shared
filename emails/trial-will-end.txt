@@ -1,0 +1,7 @@
+Hello,
+
+Your trial subscription to Confirmed VPN is ending in three days. After the trial ends, billing will begin for your subscription. If you'd like to change or cancel your plan, click the link below to sign in:
+
+{{ signinurl }}
+
+- Team Confirmed

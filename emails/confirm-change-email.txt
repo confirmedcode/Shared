@@ -1,0 +1,7 @@
+Hello,
+
+Click this link to confirm changing your email:
+{{ confirmemailurl }}
+
+Thanks,
+Team Confirmed
