@@ -17,7 +17,7 @@ const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
 const GOOGLE_PACKAGE_NAME = process.env.GOOGLE_PACKAGE_NAME;
 const GOOGLE_LICENSE_KEY = process.env.GOOGLE_LICENSE_KEY;
 const GOOGLE_OAUTH_URL = "https://accounts.google.com/o/oauth2/token";
-const TEST_ANDROID_RECEIPT_ID = "GPA.3379-5113-5867-44448";
+const TEST_ANDROID_RECEIPT_ID = "GPA.3321-2701-7540-57458";
 const TEST_IOS_RECEIPT_ID = "1000000386259702";
 const IOS_PRODUCT_ID_TO_PLAN_TYPE = {
   "TunnelsiOSUnlimitedMonthly": "ios-monthly",
