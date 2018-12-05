@@ -27,7 +27,7 @@ module.exports = {
       "Click to Confirm Email",
       "confirm-email",
       {
-        confirmemailurl: `https://www.${DOMAIN}/confirm-email?email=${toAddress}&code=${code}&browser=${browser}`
+        confirmemailurl: `https://v3.${DOMAIN}/confirm-email?email=${toAddress}&code=${code}&browser=${browser}`
       }
     );
   },
@@ -39,7 +39,7 @@ module.exports = {
       "Click to Confirm Change of Email",
       "confirm-change-email",
       {
-        confirmemailurl: `https://www.${DOMAIN}/confirm-change-email?email=${toAddress}&code=${code}`
+        confirmemailurl: `https://v3.${DOMAIN}/confirm-change-email?email=${toAddress}&code=${code}`
       }
     );
   },
@@ -51,7 +51,7 @@ module.exports = {
       "Your Request to Reset Password",
       "reset-password",
       {
-        reseturl: `https://www.${DOMAIN}/reset-password?code=${code}`
+        reseturl: `https://v3.${DOMAIN}/reset-password?code=${code}`
       }
     );
   },
@@ -63,7 +63,7 @@ module.exports = {
       "Subscription Cancelled",
       "cancel-subscription",
       {
-        signinurl: `https://www.${DOMAIN}/signin?redirecturi=%2Fnew-subscription%3Fbrowser%3Dtrue`
+        signinurl: `https://v3.${DOMAIN}/signin?redirecturi=%2Fnew-subscription%3Fbrowser%3Dtrue`
       }
     );
   },
@@ -128,7 +128,7 @@ module.exports = {
       "Your Trial is Ending",
       "trial-will-end",
       {
-        signinurl: `https://www.${DOMAIN}/signin`
+        signinurl: `https://v3.${DOMAIN}/signin`
       }
     );
   },
@@ -140,7 +140,7 @@ module.exports = {
       "[Action Required] Your Payment Method is Expiring",
       "card-will-expire",
       {
-        signinurl: `https://www.${DOMAIN}/signin?redirecturi=%2Fpayment-methods`
+        signinurl: `https://v3.${DOMAIN}/signin?redirecturi=%2Fpayment-methods`
       }
     );
   },
@@ -152,13 +152,13 @@ module.exports = {
       "[Action Required] Payment Failed - Please Update Payment Method",
       "payment-failed",
       {
-        signinurl: `https://www.${DOMAIN}/signin?redirecturi=%2Fpayment-methods`
+        signinurl: `https://v3.${DOMAIN}/signin?redirecturi=%2Fpayment-methods`
       }
     );
   },
   
   sendReferralPromo: (toAddress, referralCode) => {
-    const referralUrl = `https://www.${DOMAIN}/signin?refer=${referralCode}`;
+    const referralUrl = `https://v3.${DOMAIN}/signin?refer=${referralCode}`;
     return send(
       `team@${DOMAIN}`,
       toAddress,
@@ -179,7 +179,7 @@ module.exports = {
       "[Bonus Discount Pending] Your Referral Just Signed Up for a Trial",
       "trial-started-referrer",
       {
-        signinurl: `https://www.${DOMAIN}/signin`,
+        signinurl: `https://v3.${DOMAIN}/signin`,
         referredEmail: referredEmail
       }
     );
@@ -192,7 +192,7 @@ module.exports = {
       "[Bonus Discount Activated] Your Referral's Subscription is Now Active",
       "subscription-started-referrer",
       {
-        signinurl: `https://www.${DOMAIN}/signin`,
+        signinurl: `https://v3.${DOMAIN}/signin`,
         referredEmail: referredEmail
       }
     );
