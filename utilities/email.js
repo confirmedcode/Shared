@@ -158,7 +158,7 @@ module.exports = {
   },
   
   sendReferralPromo: (toAddress, referralCode) => {
-    const referralUrl = `https://v3.${DOMAIN}/signin?refer=${referralCode}`;
+    const referralUrl = `https://v3.${DOMAIN}/signup?refer=${referralCode}`;
     return send(
       `team@${DOMAIN}`,
       toAddress,
