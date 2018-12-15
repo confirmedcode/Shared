@@ -71,7 +71,7 @@ class Subscription {
     this.expirationDateString = expirationDateMinusGrace.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
     this.expirationDateMs = this.expirationDate.getTime()/1000;
     
-    if (subscriptionRow.cancellationDate) {
+    if (subscriptionRow.cancellation_date) {
       this.cancellationDate = new Date(subscriptionRow.cancellation_date);
       this.cancellationDateString = this.cancellationDate.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
       this.cancellationDateMs = this.cancellationDate.getTime()/1000;
