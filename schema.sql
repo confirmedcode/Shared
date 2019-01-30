@@ -63,6 +63,7 @@ CREATE TABLE users (
     month_usage_update timestamp with time zone DEFAULT now() NOT NULL,
     referral_code text NOT NULL DEFAULT upper(substring(md5(random()::text) from 0 for 10)),
     referred_by text,
+    partner_campaign text, /* format: PARTNERCODE-CAMPAIGNCODE e.g, acme-1 */
     create_date timestamp with time zone DEFAULT now() NOT NULL,
     delete_date timestamp with time zone,
     delete_reason text,
@@ -106,6 +107,52 @@ CREATE TABLE support_users (
 
 ALTER TABLE ONLY support_users
     ADD CONSTRAINT support_users_email_pkey PRIMARY KEY (email);
+
+/*****************************************************/
+/********************* PARTNERS **********************/
+/*****************************************************/
+
+CREATE TABLE partners (
+    id SERIAL,
+    title text NOT NULL,
+    code text NOT NULL,
+    percentage_share smallint NOT NULL
+);
+
+ALTER TABLE ONLY partners
+    ADD CONSTRAINT partners_code_pkey PRIMARY KEY (code);
+
+/*****************************************************/
+/******************* PARTNER USERS *******************/
+/*****************************************************/
+
+CREATE TABLE partner_users (
+    id SERIAL,
+    email text NOT NULL,
+    password text NOT NULL,
+    partner_code text NOT NULL /* The partner data that this partner is allowed to access. will be able to check number of signups for users with partner column: partner_code-*, for example, acme-1, acme-9 etc */
+);
+
+ALTER TABLE ONLY partner_users
+    ADD CONSTRAINT partner_users_email_pkey PRIMARY KEY (email);
+
+ALTER TABLE ONLY partner_users
+    ADD CONSTRAINT partner_users_partner_code_fkey FOREIGN KEY (partner_code) REFERENCES partners(code) ON UPDATE CASCADE;
+
+/*****************************************************/
+/***************** PARTNER SNAPSHOTS *****************/
+/*****************************************************/
+
+CREATE TABLE partner_snapshots (
+    id SERIAL,
+    create_date timestamp with time zone DEFAULT now() NOT NULL,
+    partner_code text NOT NULL,
+    summary text NOT NULL,
+    campaigns text NOT NULL
+);
+
+ALTER TABLE ONLY partner_snapshots
+    ADD CONSTRAINT partner_snapshots_partner_code_fkey FOREIGN KEY (partner_code) REFERENCES partners(code) ON UPDATE CASCADE;
 
 /*****************************************************/
 /******************* SUBSCRIPTIONS *******************/
@@ -155,6 +202,14 @@ GRANT SELECT(id, email, email_encrypted, stripe_id, create_date, referred_by, de
 GRANT SELECT ON subscriptions TO support;
 GRANT SELECT, UPDATE, INSERT ON support_users TO support;
 
+CREATE USER partner WITH ENCRYPTED PASSWORD '{{ partner_password }}';
+GRANT SELECT(id, create_date, referred_by, delete_date, delete_reason, banned, email_confirmed, partner_campaign) ON users TO partner;
+GRANT SELECT(user_id, receipt_id, receipt_type, plan_type, expiration_date, cancellation_date, in_trial, failed_last_check, updated) ON subscriptions TO partner;
+GRANT SELECT ON partners TO partner;
+GRANT SELECT ON partner_users TO partner;
+GRANT SELECT ON partner_snapshots TO partner;
+GRANT UPDATE(password) ON partner_users TO partner;
+
 CREATE USER webhook WITH ENCRYPTED PASSWORD '{{ webhook_password }}';
 GRANT SELECT(id, email, email_encrypted, stripe_id, email_confirmed, referred_by, referral_code, do_not_email, do_not_email_code) ON users TO webhook;
 GRANT SELECT(user_id, receipt_type, plan_type, expiration_date, cancellation_date, in_trial, failed_last_check, renew_enabled, updated) ON subscriptions TO webhook;
@@ -164,4 +219,4 @@ GRANT SELECT ON admin_users TO debug;
 GRANT SELECT(serial, source_id, user_id, revoked, assigned) ON certificates TO debug;
 GRANT SELECT(user_id, receipt_type, plan_type, expiration_date, cancellation_date, in_trial, failed_last_check, renew_enabled, updated) ON subscriptions TO debug;
 GRANT SELECT ON support_users TO debug;
-GRANT SELECT(id, email_confirmed, month_usage_megabytes, month_usage_update, do_not_email, do_not_email_code) ON users TO debug;
+GRANT SELECT(id, email_confirmed, month_usage_megabytes, month_usage_update, do_not_email, do_not_email_code, partner_campaign) ON users TO debug;

@@ -8,7 +8,7 @@ function getEmpty() {
   return fs.readFile(path.join(__dirname, "schema.sql"), "utf-8");
 }
 
-function getTemplated(mainPass, helperPass, renewerPass, supportPass, webhookPass, debugPass) {
+function getTemplated(mainPass, helperPass, renewerPass, supportPass, partnerPass, webhookPass, debugPass) {
   return fs.readFile(path.join(__dirname, "schema.sql"), "utf-8")
   .then( schema => {
     Logger.info("Read schema from disk."); 
@@ -18,6 +18,7 @@ function getTemplated(mainPass, helperPass, renewerPass, supportPass, webhookPas
       helper_password: helperPass,
       renewer_password: renewerPass,
       support_password: supportPass,
+      partner_password: partnerPass,
       webhook_password: webhookPass,
       debug_password: debugPass
     });

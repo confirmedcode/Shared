@@ -40,6 +40,7 @@ class User {
     this.monthUsageUpdate = new Date(userRow.month_usage_update);
     this.referralCode = userRow.referral_code;
     this.referredBy = userRow.referred_by;
+    this.partnerCampaign = userRow.partner_campaign;
     this.createDate = new Date(userRow.create_date);
     this.deleteDate = userRow.delete_date ? new Date(userRow.delete_date) : null;
     this.deleteReason = userRow.delete_reason;
@@ -570,7 +571,7 @@ class User {
       });
   }
   
-  static getWithIAPReceipt(receiptData, receiptType) {
+  static getWithIAPReceipt(receiptData, receiptType, partnerCampaign = null) {
     return Receipt.createWithIAP(receiptData, receiptType)
       .then( receipt => {
         // If receiptId, receiptType exists in database, use that user. Otherwise create a new user.
@@ -592,10 +593,10 @@ class User {
               return Certificate.getUnassigned()
                 .then(certificate => {
                   return Database.query(
-                    `INSERT INTO users(id, email_confirm_code)
-                    VALUES($1, $2)
+                    `INSERT INTO users(id, email_confirm_code, partner_campaign)
+                    VALUES($1, $2, $3)
                     RETURNING *`,
-                    [certificate.userId, emailConfirmCode])
+                    [certificate.userId, emailConfirmCode, partnerCampaign])
                   .catch( error => {
                     throw new ConfirmedError(500, 14, "Error creating user with IAP receipt", error);
                   });

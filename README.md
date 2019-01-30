@@ -3,7 +3,7 @@
 Confirmed VPN uses two databases: one Postgres and one Redis. The following documents each database's schema and purpose.
 
 ## Postgres
-The Postgres database stores Admin Users, Certificates, Subscriptions, Support Users, and Users.
+The Postgres database stores Admin Users, Certificates, Partner Snapshots, Partner Users, Partners, Subscriptions, Support Users, and Users.
 
 ### Tables
 
@@ -74,38 +74,7 @@ The Postgres database is accessible by all Confirmed servers except VPN. Securit
 
 Each server type (Main, Renewer, Helper, etc) can only use a specific database `ROLE` with the bare minimum permissions scoped to only what the server type needs. For example, `renewer` can do `SELECT` and `UPDATE` on the `subscriptions` table, but has no access at all to the `users` table.
 
-Specific grants are copied from `schema.sql` below.
-
-```
-CREATE USER main WITH ENCRYPTED PASSWORD '{{ main_password }}';
-GRANT SELECT, UPDATE(assigned) ON certificates TO main;
-GRANT SELECT, INSERT, UPDATE ON subscriptions TO main;
-GRANT SELECT, INSERT, UPDATE ON users TO main;
-
-CREATE USER helper WITH ENCRYPTED PASSWORD '{{ helper_password }}';
-GRANT SELECT(user_id, cancellation_date, expiration_date) ON subscriptions TO helper;
-GRANT SELECT(source_id, user_id, revoked, assigned) ON certificates TO helper;
-GRANT SELECT(id, month_usage_megabytes, month_usage_update), UPDATE(month_usage_megabytes, month_usage_update) ON users TO helper;
-
-CREATE USER renewer WITH ENCRYPTED PASSWORD '{{ renewer_password }}';
-GRANT SELECT, UPDATE ON subscriptions TO renewer;
-
-CREATE USER support WITH ENCRYPTED PASSWORD '{{ support_password }}';
-GRANT SELECT(id, email, email_encrypted, stripe_id, email_confirmed) ON users TO support;
-GRANT SELECT ON subscriptions TO support;
-GRANT SELECT, UPDATE, INSERT ON support_users TO support;
-
-CREATE USER webhook WITH ENCRYPTED PASSWORD '{{ webhook_password }}';
-GRANT SELECT(id, email, email_encrypted, stripe_id, email_confirmed) ON users TO webhook;
-GRANT SELECT(user_id, receipt_type, plan_type, expiration_date, cancellation_date, in_trial, failed_last_check, renew_enabled, updated) ON subscriptions TO webhook;
-
-CREATE USER debug WITH ENCRYPTED PASSWORD '{{ debug_password }}';
-GRANT SELECT ON admin_users TO debug;
-GRANT SELECT(serial, source_id, user_id, revoked, assigned) ON certificates TO debug;
-GRANT SELECT(user_id, receipt_type, plan_type, expiration_date, cancellation_date, in_trial, failed_last_check, renew_enabled, updated) ON subscriptions TO debug;
-GRANT SELECT ON support_users TO debug;
-GRANT SELECT(id, email_confirmed, month_usage_megabytes, month_usage_update) ON users TO debug;
-```
+Specific grants are located in `schema.sql`.
 
 ## Redis
 
@@ -131,7 +100,7 @@ Prefix | Description
 ## Feedback
 If you have any questions, concerns, or other feedback, please let us know any feedback in Github issues or by e-mail.
 
-We also have a bug bounty program that can be found here: https://hackerone.com/confirmed_inc
+We also have a bug bounty program -- please email <engineering@confirmedvpn.com> for details.
 
 ## License
 
