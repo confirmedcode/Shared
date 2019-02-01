@@ -51,6 +51,10 @@ class RuleFile {
     })
     .then(ruleFile => {
       rules.push(ruleFile);
+      return getRuleFile("update.yaml");
+    })
+    .then(ruleFile => {
+      rules.push(ruleFile);
       return rules;
     });
   }
