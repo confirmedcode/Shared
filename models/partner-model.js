@@ -66,10 +66,10 @@ class Partner {
           }
         }
         if (row.in_trial == true) {
-          campaigns[row.partner_campaign][row.plan_type]["trial"] = [row];
+          campaigns[row.partner_campaign][row.plan_type]["trial"].push(row);
         }
         else {
-          campaigns[row.partner_campaign][row.plan_type]["paying"] = [row];
+          campaigns[row.partner_campaign][row.plan_type]["paying"].push(row);
         }
       });
       // Sum the revenue
