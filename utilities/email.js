@@ -221,7 +221,7 @@ module.exports = {
 
 function send(fromAddress, toAddress, subject, templateName, parameters) {
   var html, text, optOutLink;
-  var emailHashed = Secure.hashEmail(toAddress, EMAIL_SALT);
+  var emailHashed = Secure.hashSha512(toAddress, EMAIL_SALT);
   var doNotEmail = false;
   return Database.query(
     `SELECT do_not_email, do_not_email_code

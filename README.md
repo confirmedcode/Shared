@@ -94,7 +94,7 @@ Prefix | Description
 --- | ---
 `a:` | Admin User Sessions
 `u:` | User Sessions
-`b:` | Brute Force Tracking
+`erl:` | Rate Limiting Tracking
 `s:` | Support User Sessions
 
 ## Feedback

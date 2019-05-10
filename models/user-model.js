@@ -396,7 +396,7 @@ class User {
       })
       .then(newPasswordHashed => {
         const emailEncrypted = Secure.aesEncrypt(newEmail, AES_EMAIL_KEY);
-        const newEmailHashed = Secure.hashEmail(newEmail, EMAIL_SALT);
+        const newEmailHashed = Secure.hashSha512(newEmail, EMAIL_SALT);
         return Database.query(
           `UPDATE users 
           SET email = $1, email_encrypted = $2, password = $3
@@ -419,7 +419,7 @@ class User {
     const emailConfirmCode = Secure.generateEmailConfirmCode();
     return User.failIfEmailTaken(newEmail)
       .then(success => {
-        const newEmailHashed = Secure.hashEmail(newEmail, EMAIL_SALT);
+        const newEmailHashed = Secure.hashSha512(newEmail, EMAIL_SALT);
         return Database.query(
           `UPDATE users 
           SET change_email = $1, email_confirm_code = $2
@@ -463,7 +463,7 @@ class User {
         return Secure.hashPassword(password);
       })
       .then(passwordHashed => {
-        const emailHashed = Secure.hashEmail(email, EMAIL_SALT);
+        const emailHashed = Secure.hashSha512(email, EMAIL_SALT);
         const emailEncrypted = Secure.aesEncrypt(email, AES_EMAIL_KEY);
         const emailConfirmCode = Secure.generateEmailConfirmCode();
         return Database.query(
@@ -510,7 +510,7 @@ class User {
   }
   
   static getWithEmail(email, columns = "*", accessDeleted = false) {
-    var emailHashed = Secure.hashEmail(email, EMAIL_SALT);
+    var emailHashed = Secure.hashSha512(email, EMAIL_SALT);
     return Database.query(
       `SELECT ${columns} FROM users
       WHERE email = $1
@@ -549,7 +549,7 @@ class User {
   }
   
   static getWithEmailAndPassword(email, password) {
-    var emailHashed = Secure.hashEmail(email, EMAIL_SALT);
+    var emailHashed = Secure.hashSha512(email, EMAIL_SALT);
     return Database.query(
       `SELECT * FROM users
       WHERE email = $1
@@ -614,7 +614,7 @@ class User {
   }
   
   static confirmChangeEmail(code, email) {
-    const emailHashed = Secure.hashEmail(email, EMAIL_SALT);
+    const emailHashed = Secure.hashSha512(email, EMAIL_SALT);
     const emailEncrypted = Secure.aesEncrypt(email, AES_EMAIL_KEY);
     return Database.query(
     `SELECT * FROM users
@@ -651,7 +651,7 @@ class User {
   }
 
   static confirmEmail(code, email) {
-    const emailHashed = Secure.hashEmail(email, EMAIL_SALT);
+    const emailHashed = Secure.hashSha512(email, EMAIL_SALT);
     return Database.query(
     `SELECT * FROM users
     WHERE email_confirm_code = $1
@@ -719,7 +719,7 @@ class User {
   }
   
   static failIfEmailTaken(email) {
-    var emailHashed = Secure.hashEmail(email, EMAIL_SALT);
+    var emailHashed = Secure.hashSha512(email, EMAIL_SALT);
     return Database.query(
       `SELECT * FROM users
       WHERE email = $1
@@ -743,7 +743,7 @@ class User {
   }
   
   static resendConfirmCode(email) {
-    var emailHashed = Secure.hashEmail(email, EMAIL_SALT);
+    var emailHashed = Secure.hashSha512(email, EMAIL_SALT);
     return Database.query(
       `SELECT *
       FROM users
@@ -768,7 +768,7 @@ class User {
   }
   
   static generatePasswordReset(email) {
-    var emailHashed = Secure.hashEmail(email, EMAIL_SALT);
+    var emailHashed = Secure.hashSha512(email, EMAIL_SALT);
     var passwordResetCode = Secure.generatePasswordResetCode();
     return Database.query(
       `UPDATE users
@@ -907,7 +907,7 @@ class User {
   }
   
   static setDoNotEmail(email, code) {
-    var emailHashed = Secure.hashEmail(email, EMAIL_SALT);
+    var emailHashed = Secure.hashSha512(email, EMAIL_SALT);
     return Database.query(
       `UPDATE users
       SET do_not_email = true

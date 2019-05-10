@@ -9,6 +9,12 @@ const AES_IV_PREFIX_LENGTH = 16;
 
 module.exports = {
   
+  hashSha512: (toHash, salt) => {
+    var hash = crypto.createHmac("sha512", salt);
+    hash.update(toHash);
+    return hash.digest("hex");
+  },
+  
   hashEmail: (toHash, salt) => {
     var hash = crypto.createHmac("sha512", salt);
     hash.update(toHash);
