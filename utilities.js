@@ -1,5 +1,5 @@
 module.exports = {
-  Cloudwatch: require("./utilities/cloudwatch.js"),
+  Audit: require("./utilities/audit.js"),
   Database: require("./utilities/database.js"),
   Email: require("./utilities/email.js"),
   Exec: require("./utilities/exec.js"),
