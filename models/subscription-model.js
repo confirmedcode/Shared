@@ -302,39 +302,47 @@ class Subscription {
       return User.getWithId(this.userId, "id, email, email_encrypted, email_confirmed")
       .then(user => {
         if (user.emailEncrypted && user.emailConfirmed == true) {
-          return Email.sendCancelSubscription(user.email)
-          .then( success => {
-            Logger.info("Cancellation email sent.");
-            return Database.query(
-              `UPDATE subscriptions 
-              SET sent_cancellation_email = $1 
-              WHERE receipt_id = $2 
-              RETURNING *`,
-              [true, this.receiptId])
-            .catch( error => {
-              Logger.error("ERROR Couldn't set sent_cancellation_email for: " + this.receiptId, error); 
-            })
-            .then(result => {
-              if (result.rowCount !== 1) {
-                Logger.error("ERROR Couldn't set sent_cancellation_email for: " + this.receiptId);
-              }
-              else {
-                Logger.info("Cancellation email sent flag set to true.");
-                return new Subscription(result.rows[0]);
-              }
-            });
-          });
+          return User.hasActiveSubscription(this.userId)
+          .then(hasActiveSubscription => {
+            if (hasActiveSubscription == true) {
+              Logger.info("Still has other active subscription, not sending cancellation email.")
+              return this;
+            }
+            else {
+              return Email.sendCancelSubscription(user.email)
+              .then( success => {
+                Logger.info("Cancellation email sent.");
+                return Database.query(
+                  `UPDATE subscriptions 
+                  SET sent_cancellation_email = $1 
+                  WHERE receipt_id = $2 
+                  RETURNING *`,
+                  [true, this.receiptId])
+                .catch( error => {
+                  Logger.error("ERROR Couldn't set sent_cancellation_email for: " + this.receiptId, error); 
+                })
+                .then(result => {
+                  if (result.rowCount !== 1) {
+                    Logger.error("ERROR Couldn't set sent_cancellation_email for: " + this.receiptId);
+                  }
+                  else {
+                    Logger.info("Cancellation email sent flag set to true.");
+                    return new Subscription(result.rows[0]);
+                  }
+                });
+              });
+            }
+          })
         }
         else {
-          // No user email, no email to send
           Logger.info("No user email, not sending cancellation email.")
-          return true;
+          return this;
         }
       })
     }
     else {
       Logger.info("Not sending cancellation email, already sent.");
-      return true;
+      return this;
     }
   }
   
