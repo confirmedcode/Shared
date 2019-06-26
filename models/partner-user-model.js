@@ -1,10 +1,6 @@
 const ConfirmedError = require("../error.js");
 const Logger = require("../logger.js");
 
-// Models
-const Partner = require("./partner-model.js");
-const PartnerSnapshot = require("./partner-snapshot-model.js");
-
 // Utilities
 const Database = require("../utilities/database.js");
 const Secure = require("../utilities/secure.js");
@@ -167,3 +163,7 @@ class PartnerUser {
 }
 
 module.exports = PartnerUser;
+
+// Models - Refer after export to avoid circular/incomplete reference
+const Partner = require("./partner-model.js");
+const PartnerSnapshot = require("./partner-snapshot-model.js");

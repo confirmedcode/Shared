@@ -169,6 +169,8 @@ CREATE TABLE subscriptions (
     in_trial boolean DEFAULT true NOT NULL,
     failed_last_check boolean DEFAULT false NOT NULL,
     renew_enabled boolean DEFAULT true NOT NULL,
+    expiration_intent_cancelled boolean DEFAULT false NOT NULL,
+    sent_cancellation_email boolean DEFAULT false NOT NULL,
     updated timestamp with time zone DEFAULT now() NOT NULL
 );
 
@@ -195,6 +197,7 @@ GRANT SELECT(source_id, user_id, revoked, assigned) ON certificates TO helper;
 GRANT SELECT(id, month_usage_megabytes, month_usage_update), UPDATE(month_usage_megabytes, month_usage_update) ON users TO helper;
 
 CREATE USER renewer WITH ENCRYPTED PASSWORD '{{ renewer_password }}';
+GRANT SELECT(id, email, email_encrypted, stripe_id, create_date, referred_by, delete_date, delete_reason, banned, month_usage_megabytes, month_usage_update, email_confirmed, do_not_email, do_not_email_code) ON users TO renewer;
 GRANT SELECT, UPDATE ON subscriptions TO renewer;
 
 CREATE USER support WITH ENCRYPTED PASSWORD '{{ support_password }}';

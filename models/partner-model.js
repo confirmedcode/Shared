@@ -1,9 +1,6 @@
 const ConfirmedError = require("../error.js");
 const Logger = require("../logger.js");
 
-// Models
-const PartnerSnapshot = require("./partner-snapshot-model.js");
-
 // Constants
 const PLAN_TO_ESTIMATED_REVENUE = {
   "ios-monthly": 4.99,
@@ -201,3 +198,6 @@ class Partner {
 }
 
 module.exports = Partner;
+
+// Models - Refer after export to avoid circular/incomplete reference
+const PartnerSnapshot = require("./partner-snapshot-model.js");

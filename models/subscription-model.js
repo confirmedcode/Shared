@@ -6,8 +6,6 @@ const Database = require("../utilities/database.js");
 const Secure = require("../utilities/secure.js");
 const Stripe = require("../utilities/stripe.js");
 const Email = require("../utilities/email.js");
-const Receipt = require("./receipt-model.js");
-const User = require("./user-model.js");
 
 // Local Variables
 var successChecked = 0; // How many subscriptions succeeded updating in this job
@@ -94,6 +92,8 @@ class Subscription {
       this.id = subscriptionRow.id;
       this.failedLastCheck = subscriptionRow.failed_last_check;
       this.renewEnabled = subscriptionRow.renew_enabled;
+      this.expirationIntentCancelled = subscriptionRow.expiration_intent_cancelled;
+      this.sentCancellationEmail = subscriptionRow.sent_cancellation_email;
     }
     
   }
@@ -163,8 +163,8 @@ class Subscription {
     // add to the db with three day buffer, or if there is an existing user_id & receipt_id pair, then update its fields
     var receiptDataEncrypted = Secure.aesEncrypt(receipt.data.toString(), AES_RECEIPT_DATA_KEY);
     return Database.query(
-      `INSERT INTO subscriptions(user_id, plan_type, receipt_id, receipt_data, expiration_date, cancellation_date, receipt_type, in_trial)
-      VALUES($1, $2, $3, $4, to_timestamp($5) + interval '1 day' * $10, to_timestamp($6), $7, $8)
+      `INSERT INTO subscriptions(user_id, plan_type, receipt_id, receipt_data, expiration_date, cancellation_date, receipt_type, in_trial, expiration_intent_cancelled, renew_enabled)
+      VALUES($1, $2, $3, $4, to_timestamp($5) + interval '1 day' * $10, to_timestamp($6), $7, $8, $11, $12)
       ON CONFLICT ON CONSTRAINT subscriptions_receipt_id_pkey DO UPDATE
       SET 
         user_id = $1,
@@ -174,9 +174,24 @@ class Subscription {
         cancellation_date = to_timestamp($6),
         updated = to_timestamp($9),
         receipt_type = $7,
-        in_trial = $8 
+        in_trial = $8,
+        expiration_intent_cancelled = $11,
+        renew_enabled = $12
       RETURNING *`,
-      [user.id, receipt.planType, receipt.id, receiptDataEncrypted, receipt.expireDateMs/1000, receipt.cancelDateMs == null ? null : receipt.cancelDateMs/1000, receipt.type, receipt.inTrial, Date.now()/1000, gracePeriodDays])
+      [
+        user.id,
+        receipt.planType,
+        receipt.id,
+        receiptDataEncrypted,
+        receipt.expireDateMs/1000,
+        receipt.cancelDateMs == null ? null : receipt.cancelDateMs/1000,
+        receipt.type,
+        receipt.inTrial,
+        Date.now()/1000,
+        gracePeriodDays,
+        receipt.expirationIntentCancelled,
+        receipt.renewEnabled
+      ])
       .catch( error => {
         throw new ConfirmedError(500, 8, "Error creating/updating subscription", error); 
       })
@@ -229,14 +244,15 @@ class Subscription {
     return Database.query(
       `UPDATE subscriptions 
       SET receipt_data = $1,
-          expiration_date = to_timestamp($2) + interval '1' day * $8,
+          expiration_date = to_timestamp($2) + interval '1' day * $9,
           cancellation_date = to_timestamp($3),
           receipt_type = $4,
           in_trial = $5,
           failed_last_check = false,
           renew_enabled = $6,
+          expiration_intent_cancelled = $7,
           updated = now()
-      WHERE receipt_id = $7
+      WHERE receipt_id = $8
       RETURNING *`,
       [receiptDataEncrypted,
         receipt.expireDateMs/1000,
@@ -244,6 +260,7 @@ class Subscription {
         receipt.type,
         receipt.inTrial,
         receipt.renewEnabled,
+        receipt.expirationIntentCancelled,
         receipt.id,
         gracePeriodDays])
     .catch( error => {
@@ -275,6 +292,50 @@ class Subscription {
           return new Subscription(result.rows[0]);
         }
       });
+  }
+  
+  sendCancellationEmail() {
+    // Only send cancellation email if cancellation email hasn't already been sent, AND user has email
+    if (this.sentCancellationEmail == false) {
+      Logger.info("Cancellation email not sent yet, getting user email to send.");
+      // Get user email
+      return User.getWithId(this.userId, "id, email, email_encrypted, email_confirmed")
+      .then(user => {
+        if (user.emailEncrypted && user.emailConfirmed == true) {
+          return Email.sendCancelSubscription(user.email)
+          .then( success => {
+            Logger.info("Cancellation email sent.");
+            return Database.query(
+              `UPDATE subscriptions 
+              SET sent_cancellation_email = $1 
+              WHERE receipt_id = $2 
+              RETURNING *`,
+              [true, this.receiptId])
+            .catch( error => {
+              Logger.error("ERROR Couldn't set sent_cancellation_email for: " + this.receiptId, error); 
+            })
+            .then(result => {
+              if (result.rowCount !== 1) {
+                Logger.error("ERROR Couldn't set sent_cancellation_email for: " + this.receiptId);
+              }
+              else {
+                Logger.info("Cancellation email sent flag set to true.");
+                return new Subscription(result.rows[0]);
+              }
+            });
+          });
+        }
+        else {
+          // No user email, no email to send
+          Logger.info("No user email, not sending cancellation email.")
+          return true;
+        }
+      })
+    }
+    else {
+      Logger.info("Not sending cancellation email, already sent.");
+      return true;
+    }
   }
   
   static renewFailed() {
@@ -398,7 +459,23 @@ function makeRenewChainFromRows(subscriptionRows) {
       .then( updatedSubscription => {
         successChecked = successChecked + 1;
         Logger.info("Subscription updated for ID: " + updatedSubscription.receiptId);
-        return updatedSubscription;
+        // If subscription expired AND no intent to renew AND haven't sent cancellation email, then send cancellation email
+        var now = new Date();
+        Logger.info("Checking if we should send cancellation email--");
+        if ((updatedSubscription.expirationDateMs > now.getTime()/1000) && updatedSubscription.cancellationDateMs == null) {
+          Logger.info("Not sending: Subscription still active, not expired")
+        }
+        else if (updatedSubscription.expirationIntentCancelled != true) {
+          Logger.info("Not sending: Does not intend to cancel after expiration.");
+        }
+        else if (updatedSubscription.sentCancellationEmail == true) {
+          Logger.info("Not sending: Already sent cancellation email.");
+        }
+        else {
+          Logger.info("Sending cancellation email (if there is an email): expired, intends to cancel, and not sent cancellation yet.");
+          return updatedSubscription.sendCancellationEmail();
+        }
+        return true;
       })
       .catch( error => {
         if (error.statusCode == 200) {
@@ -416,3 +493,7 @@ function makeRenewChainFromRows(subscriptionRows) {
 }
 
 module.exports = Subscription;
+
+// Models - Refer after export to avoid circular/incomplete reference
+const Receipt = require("./receipt-model.js");
+const User = require("./user-model.js");

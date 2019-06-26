@@ -1,9 +1,6 @@
 const ConfirmedError = require("../error.js");
 const Logger = require("../logger.js");
 
-// Models
-const User = require("./user-model.js");
-
 // Utilities
 const Database = require("../utilities/database.js");
 const Exec = require("../utilities/exec.js");
@@ -392,3 +389,6 @@ function getSourceDirectories() {
 }
 
 module.exports = Source;
+
+// Models - Refer after export to avoid circular/incomplete reference
+const User = require("./user-model.js");

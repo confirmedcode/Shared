@@ -60,7 +60,7 @@ module.exports = {
     return send(
       `team@${DOMAIN}`,
       toAddress,
-      "Subscription Cancelled",
+      "[One-Time Offer] Tell Us Why You Cancelled, Get Free VPN",
       "cancel-subscription",
       {
         signinurl: `https://www.${DOMAIN}/signin?redirecturi=%2Fnew-subscription%3Fbrowser%3Dtrue`

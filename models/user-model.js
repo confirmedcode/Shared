@@ -9,11 +9,6 @@ const Secure = require("../utilities/secure.js");
 const Email = require("../utilities/email.js");
 const Stripe = require("../utilities/stripe.js");
 
-// Models
-const Subscription = require("./subscription-model.js");
-const Receipt = require("./receipt-model.js");
-const Certificate = require("./certificate-model.js");
-
 // Constants
 const AES_P12_KEY = process.env.AES_P12_KEY;
 const AES_EMAIL_KEY = process.env.AES_EMAIL_KEY;
@@ -377,15 +372,17 @@ class User {
   }
   
   cancelSubscriptionWithReceiptId(receiptId) {
+    var subscription;
     return Subscription.getWithUserAndReceiptId(this, receiptId)
-    .then( subscription => {
+    .then( result => {
+      subscription = result;
       return Stripe.deleteSubscription(subscription.receiptId);
     })
     .then( stripeSubscription => {
       return this.updateWithStripe(stripeSubscription);
     })
     .then( result => {
-      return Email.sendCancelSubscription(this.email);
+      return subscription.sendCancellationEmail();
     });
   }
   
@@ -928,3 +925,8 @@ class User {
 }
 
 module.exports = User;
+
+// Models - Refer after export to avoid circular/incomplete reference
+const Subscription = require("./subscription-model.js");
+const Receipt = require("./receipt-model.js");
+const Certificate = require("./certificate-model.js");

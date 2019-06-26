@@ -36,7 +36,7 @@ const ANDROID_PRODUCT_ID_TO_PLAN_TYPE = {
 
 class Receipt {
   
-  constructor(type, id, planType, expireDateMs, cancelDateMs, inTrial, renewEnabled, data) {
+  constructor(type, id, planType, expireDateMs, cancelDateMs, inTrial, renewEnabled, data, expirationIntentCancelled = false) {
     this.type = type;
     if (id == TEST_IOS_RECEIPT_ID && (NODE_ENV !== "test" && NODE_ENV !== "development")) {
       throw new ConfirmedError(400, 57, "Not allowed to use the iOS test receipt in non-test environment.");
@@ -51,6 +51,7 @@ class Receipt {
     this.inTrial = inTrial;
     this.renewEnabled = renewEnabled;
     this.data = data;
+    this.expirationIntentCancelled = expirationIntentCancelled;
   }
   
   static createWithStripe(stripeSubscription) {
@@ -68,8 +69,9 @@ class Receipt {
       stripeSubscription.status == "trialing" ? stripeSubscription.trial_end * 1000 : stripeSubscription.current_period_end * 1000,
       stripeSubscription.canceled_at == null ? null : stripeSubscription.canceled_at * 1000,
       stripeSubscription.status == "trialing",
-      stripeSubscription.cancel_at_period_end == false,
-      JSON.stringify(stripeSubscription));
+      stripeSubscription.canceled_at == null,
+      JSON.stringify(stripeSubscription),
+      stripeSubscription.canceled_at != null);
   }
   
   static createWithIAP(receiptData, receiptType, isIosSandbox = false, attempt = 0) {
@@ -197,7 +199,8 @@ class Receipt {
           latestReceiptInfo.cancellation_date_ms,
           latestReceiptInfo.is_trial_period,
           pendingRenewalInfo.auto_renew_status == 1 ? true : false,
-          body.latest_receipt);
+          body.latest_receipt,
+          pendingRenewalInfo.expiration_intent == 1 ? true : false);
       });
     }
     else if (receiptType == "android") {
@@ -329,7 +332,8 @@ class Receipt {
           body.userCancellationTimeMillis,
           body.paymentState == 2,
           body.autoRenewing,
-          receiptData
+          receiptData,
+          body.hasOwnProperty("cancelReason") && body.cancelReason == 0
         );
       });
 
