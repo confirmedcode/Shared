@@ -270,7 +270,7 @@ class Receipt {
         let access_token = body.access_token;
         return rp({
           method: "GET",
-          uri: "https://www.googleapis.com/androidpublisher/v2/applications/"
+          uri: "https://www.googleapis.com/androidpublisher/v3/applications/"
           + GOOGLE_PACKAGE_NAME + "/purchases/subscriptions/" 
           + productId + "/tokens/"
           + purchaseToken
