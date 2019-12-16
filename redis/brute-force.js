@@ -18,8 +18,8 @@ const ONE_MINUTE = 1 * 60 * 1000;
 var bruteApiCount = 0;
 
 const store = new RateLimitRedis({
-  expiry: 60,
-  resetExpiryOnChange: false,
+  expiry: 900,
+  resetExpiryOnChange: true,
   prefix: "erl:", // "express rate limit",
   client: RedisClient
 });
