@@ -18,7 +18,7 @@ const ONE_MINUTE = 1 * 60 * 1000;
 var bruteApiCount = 0;
 
 const store = new RateLimitRedis({
-  expiry: 900,
+  expiry: 1500,
   resetExpiryOnChange: true,
   prefix: "erl:", // "express rate limit",
   client: RedisClient
@@ -32,8 +32,8 @@ const failCallback = function (request, response, next) {
       response.status(429).json({
         code: 999,
         message: "Too many requests in this time frame.",
-        nextValidRequestDate: nextValidRequestDate,
-        nextValidRequestDateHuman: humanTime
+        // nextValidRequestDate: nextValidRequestDate,
+        // nextValidRequestDateHuman: humanTime
       });
     },
     html: () => {
