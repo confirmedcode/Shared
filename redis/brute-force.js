@@ -18,7 +18,7 @@ const ONE_MINUTE = 1 * 60 * 1000;
 var bruteApiCount = 0;
 
 const store = new RateLimitRedis({
-  expiry: 1500,
+  expiry: 7200,
   resetExpiryOnChange: true,
   prefix: "erl:", // "express rate limit",
   client: RedisClient
@@ -37,7 +37,7 @@ const failCallback = function (request, response, next) {
       });
     },
     html: () => {
-      request.flashRedirect("error", "Too many requests in this time frame. Try again " + humanTime + "." , "notification");
+      request.flashRedirect("error", "Too many requests in this time frame." , "notification");
     }
   });
 };
@@ -55,7 +55,7 @@ function makeBruteForce(freeRetries = 500) {
     },
     handler: failCallback,
     skipFailedRequests: false,
-    skipSuccessfulRequests: false,
+    skipSuccessfulRequests: true,
     store: store
   });
 }
