@@ -21,10 +21,6 @@ const pool = new Pool({
   connectionTimeoutMillis: 10000,
 });
 
-pool.on('connect', client => {
-  Logger.info("Postgres SSL Config: " + client.connection.ssl)
-})
-
 pool.on('error', (error, c) => {
   Logger.error("Postgres error: " + error);
 })
