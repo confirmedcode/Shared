@@ -765,7 +765,7 @@ class User {
       });
   }
   
-  static generatePasswordReset(email) {
+  static generatePasswordReset(email, lockdown = false) {
     var emailHashed = Secure.hashSha512(email, EMAIL_SALT);
     var passwordResetCode = Secure.generatePasswordResetCode();
     return Database.query(
@@ -780,7 +780,7 @@ class User {
       })
       .then( result => {
         if (result.rowCount === 1) {
-          return Email.sendResetPassword(email, passwordResetCode);
+          return Email.sendResetPassword(email, passwordResetCode, lockdown);
         }
         else {
           return true;
