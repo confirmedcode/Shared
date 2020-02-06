@@ -1,7 +1,7 @@
 Hello,
 
-Click this link to complete your Confirmed VPN signup:
+Click this link to complete your Confirmed / Lockdown signup:
 {{ confirmemailurl }}
 
 Thanks,
-Team Confirmed
+Team Confirmed / Lockdown

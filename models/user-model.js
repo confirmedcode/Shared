@@ -41,6 +41,7 @@ class User {
     this.deleteReason = userRow.delete_reason;
     this.doNotEmail = userRow.do_not_email;
     this.banned = userRow.banned;
+    this.lockdown = userRow.lockdown;
   }
   
   get email() {
@@ -454,7 +455,7 @@ class User {
       })
   }
   
-  static createWithEmailAndPassword(email, password, browser = false, referrerUserId) {
+  static createWithEmailAndPassword(email, password, browser = false, referrerUserId, lockdown = false) {
     return User.failIfEmailTaken(email)
       .then( success => {
         return Secure.hashPassword(password);
@@ -464,10 +465,10 @@ class User {
         const emailEncrypted = Secure.aesEncrypt(email, AES_EMAIL_KEY);
         const emailConfirmCode = Secure.generateEmailConfirmCode();
         return Database.query(
-          `INSERT INTO users(email, email_encrypted, password, email_confirm_code, referred_by)
-          VALUES($1, $2, $3, $4, $5)
+          `INSERT INTO users(email, email_encrypted, password, email_confirm_code, referred_by, lockdown)
+          VALUES($1, $2, $3, $4, $5, $6)
           RETURNING *`,
-          [emailHashed, emailEncrypted, passwordHashed, emailConfirmCode, referrerUserId])
+          [emailHashed, emailEncrypted, passwordHashed, emailConfirmCode, referrerUserId, lockdown])
           .catch( error => {
             throw new ConfirmedError(500, 14, "Error creating user", error);
           })
@@ -739,7 +740,7 @@ class User {
       });
   }
   
-  static resendConfirmCode(email) {
+  static resendConfirmCode(email, lockdown = false) {
     var emailHashed = Secure.hashSha512(email, EMAIL_SALT);
     return Database.query(
       `SELECT *
@@ -759,7 +760,7 @@ class User {
           throw new ConfirmedError(400, 60, "Email already confirmed. Try signing in.");
         }
         else {
-          return Email.sendConfirmation(email, user.emailConfirmCode, true);
+          return Email.sendConfirmation(email, user.emailConfirmCode, true, lockdown);
         }
       });
   }

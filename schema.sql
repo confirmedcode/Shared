@@ -69,7 +69,8 @@ CREATE TABLE users (
     delete_reason text,
     banned boolean DEFAULT false NOT NULL,
     do_not_email boolean DEFAULT false NOT NULL,
-    do_not_email_code text DEFAULT upper(substring(md5(random()::text) from 0 for 20)) NOT NULL
+    do_not_email_code text DEFAULT upper(substring(md5(random()::text) from 0 for 20)) NOT NULL,
+    lockdown boolean DEFAULT false NOT NULL
 );
 
 ALTER TABLE ONLY users

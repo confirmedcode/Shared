@@ -308,6 +308,10 @@ class Subscription {
               Logger.info("Still has other active subscription, not sending cancellation email.")
               return this;
             }
+            else if (user.lockdown == true) {
+              Logger.info("User is lockdown, not sending cancellation email.")
+              return this;
+            }
             else {
               return Email.sendCancelSubscription(user.email)
               .then( success => {

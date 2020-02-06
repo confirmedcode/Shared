@@ -20,14 +20,14 @@ const awsSesClient = new AWS.SES({
 module.exports = {
 
   // === Main
-  sendConfirmation: (toAddress, code, browser = false) => {
+  sendConfirmation: (toAddress, code, browser = false, lockdown = false) => {
     return send(
       `team@${DOMAIN}`,
       toAddress,
       "Click to Confirm Email",
       "confirm-email",
       {
-        confirmemailurl: `https://www.${DOMAIN}/confirm-email?email=${toAddress}&code=${code}&browser=${browser}`
+        confirmemailurl: `https://www.${DOMAIN}/confirm-email?email=${toAddress}&code=${code}&browser=${browser}&lockdown=${lockdown}`
       }
     );
   },
@@ -44,14 +44,14 @@ module.exports = {
     );
   },
   
-  sendResetPassword: (toAddress, code) => {
+  sendResetPassword: (toAddress, code, lockdown = false) => {
     return send(
       `team@${DOMAIN}`,
       toAddress,
       "Your Request to Reset Password",
       "reset-password",
       {
-        reseturl: `https://www.${DOMAIN}/reset-password?code=${code}`
+        reseturl: `https://www.${DOMAIN}/reset-password?code=${code}&lockdown=${lockdown}`
       }
     );
   },
@@ -262,7 +262,7 @@ function send(fromAddress, toAddress, subject, templateName, parameters) {
     }
     else {
       return awsSesClient.sendEmail({ 
-        Source: `Confirmed Team <${fromAddress}>`, 
+        Source: `Confirmed / Lockdown Team <${fromAddress}>`, 
         Destination: {
           ToAddresses: [ toAddress ]
         },
