@@ -21,25 +21,27 @@ module.exports = {
 
   // === Main
   sendConfirmation: (toAddress, code, browser = false, lockdown = false) => {
+    let emailEncoded = encodeURIComponent(toAddress)
     return send(
       `team@${DOMAIN}`,
       toAddress,
       "Click to Confirm Email",
       "confirm-email",
       {
-        confirmemailurl: `https://www.${DOMAIN}/confirm-email?email=${toAddress}&code=${code}&browser=${browser}&lockdown=${lockdown}`
+        confirmemailurl: `https://www.${DOMAIN}/confirm-email?email=${emailEncoded}&code=${code}&browser=${browser}&lockdown=${lockdown}`
       }
     );
   },
   
   sendChangeEmailConfirmation: (toAddress, code) => {
+    let emailEncoded = encodeURIComponent(toAddress)
     return send(
       `team@${DOMAIN}`,
       toAddress,
       "Click to Confirm Change of Email",
       "confirm-change-email",
       {
-        confirmemailurl: `https://www.${DOMAIN}/confirm-change-email?email=${toAddress}&code=${code}`
+        confirmemailurl: `https://www.${DOMAIN}/confirm-change-email?email=${emailEncoded}&code=${code}`
       }
     );
   },
