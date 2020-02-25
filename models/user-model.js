@@ -501,7 +501,7 @@ class User {
       })
       .then( result => {
         if (result.rows.length === 0) {
-          throw new ConfirmedError(401, 2, "Incorrect Login. Did you sign up before December 1st, 2018? Try logging in here: <a href=\"https://v2.confirmedvpn.co/signin\">Old Account Login</a>");
+          throw new ConfirmedError(401, 2, "Incorrect Login.");
         }
         return new User(result.rows[0], accessDeleted);
       });
@@ -519,7 +519,7 @@ class User {
       })
       .then( result => {
         if (result.rows.length === 0) {
-          throw new ConfirmedError(401, 2, "Incorrect Login. Did you sign up before December 1st, 2018? Try logging in here: <a href=\"https://v2.confirmedvpn.co/signin\">Old Account Login</a>");
+          throw new ConfirmedError(401, 2, "Incorrect Login.");
         }
         return new User(result.rows[0], accessDeleted);
       });
@@ -559,7 +559,7 @@ class User {
       })
       .then( result => {
         if (result.rows.length === 0) {
-          throw new ConfirmedError(401, 2, "Incorrect Login. Did you sign up before December 1st, 2018? Try logging in here: <a href=\"https://v2.confirmedvpn.co/signin\">Old Account Login</a>");
+          throw new ConfirmedError(401, 2, "Incorrect Login.");
         }
         var user = new User(result.rows[0]);
         return user.assertPassword(password)

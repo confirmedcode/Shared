@@ -32,7 +32,7 @@ module.exports = {
     return bcrypt.compare(providedPassword, correctPasswordHashed)
       .then( isCorrectPassword => {
         if (isCorrectPassword !== true) {
-          throw new ConfirmedError(401, 2, "Incorrect Login. Did you sign up before December 1st, 2018? Try logging in here: <a href=\"https://v2.confirmedvpn.co/signin\">Old Account Login</a>");
+          throw new ConfirmedError(401, 2, "Incorrect Login.");
         }
         else {
           return true;
