@@ -483,10 +483,10 @@ function makeRenewChainFromRows(subscriptionRows) {
         else if (updatedSubscription.sentCancellationEmail == true) {
           Logger.info("Not sending: Already sent cancellation email.");
         }
-        else {
-          Logger.info("Sending cancellation email (if there is an email): expired, intends to cancel, and not sent cancellation yet.");
-          return updatedSubscription.sendCancellationEmail();
-        }
+        // else {
+        //   Logger.info("Sending cancellation email (if there is an email): expired, intends to cancel, and not sent cancellation yet.");
+        //   return updatedSubscription.sendCancellationEmail();
+        // }
         return true;
       })
       .catch( error => {

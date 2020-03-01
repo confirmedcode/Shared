@@ -382,9 +382,9 @@ class User {
     .then( stripeSubscription => {
       return this.updateWithStripe(stripeSubscription);
     })
-    .then( result => {
-      return subscription.sendCancellationEmail();
-    });
+    // .then( result => {
+    //   return subscription.sendCancellationEmail();
+    // });
   }
   
   convertShadowUser(newEmail, newPassword) {
