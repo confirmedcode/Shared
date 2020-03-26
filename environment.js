@@ -33,6 +33,7 @@ const PARAMS_MAP = {
     "REDIS_PASSWORD"
   ],
   "ADMIN": [
+    "ALLOWED_IP",
     "PG_ADMIN_PASSWORD",
     "CA_PASSWORD",
     "CERT_ACCESS_SECRET",
