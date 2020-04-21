@@ -170,7 +170,16 @@ class Receipt {
         if (!body.hasOwnProperty("latest_receipt_info") || body.latest_receipt_info.length == 0) {
           throw new ConfirmedError(400, 9, "No subscription found in iOS receipt", body);
         }
-        var latestReceiptInfo = body.latest_receipt_info[0];
+        // choose the receipt with the latest expiration date
+        var latestExpirationIndex = 0
+        var latestExpirationMs = 0;
+        for (var index = 0; index < body.latest_receipt_info.length; index++) {
+          if (body.latest_receipt_info[index].hasOwnProperty("expires_date_ms") && body.latest_receipt_info[index].expires_date_ms > latestExpirationMs) {
+            latestExpirationIndex = index;
+            latestExpirationMs = body.latest_receipt_info[index].expires_date_ms
+          }
+        }
+        var latestReceiptInfo = body.latest_receipt_info[latestExpirationIndex];
 	
         if (!body.hasOwnProperty("pending_renewal_info") || body.pending_renewal_info.length == 0) {
           throw new ConfirmedError(400, 9, "iOS subscription receipt missing pending_renewal_info", body);
