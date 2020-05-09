@@ -9,6 +9,7 @@ const NODE_ENV = process.env.NODE_ENV || fatalError("FATAL - NODE_ENV not define
 const PARAMS_MAP = {
   "COMMON": [
     "DOMAIN",
+    "LD_DOMAIN",
     "CLIENT_BUCKET",
     "SURICATA_BUCKET",
     "SPEED_TEST_BUCKET",

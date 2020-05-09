@@ -2,6 +2,7 @@ const ConfirmedError = require("../error.js");
 const Logger = require("../logger.js");
 
 const DOMAIN = process.env.DOMAIN;
+const LD_DOMAIN = process.env.LD_DOMAIN;
 const NODE_ENV = process.env.NODE_ENV;
 const EMAIL_SALT = process.env.EMAIL_SALT;
 
@@ -23,7 +24,7 @@ module.exports = {
   sendConfirmation: (toAddress, code, browser = false, lockdown = false) => {
     let emailEncoded = encodeURIComponent(toAddress)
     return send(
-      `team@${DOMAIN}`,
+      lockdown ? `team@${LD_DOMAIN}` : `team@${DOMAIN}`,
       toAddress,
       "Click to Confirm Email",
       "confirm-email",
@@ -48,7 +49,7 @@ module.exports = {
   
   sendResetPassword: (toAddress, code, lockdown = false) => {
     return send(
-      `team@${DOMAIN}`,
+      lockdown ? `team@${LD_DOMAIN}` : `team@${DOMAIN}`,
       toAddress,
       "Your Request to Reset Password",
       "reset-password",
