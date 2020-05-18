@@ -184,6 +184,53 @@ ALTER TABLE ONLY subscriptions
 CREATE INDEX subscriptions_user_id_index ON subscriptions USING btree (user_id);
 
 /*****************************************************/
+/****************** PRIVACY REVIEW *******************/
+/*****************************************************/
+
+CREATE TABLE reviews (
+  id serial PRIMARY KEY,
+  name text NOT NULL UNIQUE,
+  display_name text NOT NULL,
+  tagline text NOT NULL,
+  num_trackers integer NOT NULL,
+  num_attempts integer NOT NULL,
+  rating text NOT NULL,
+  date date NOT NULL DEFAULT now(),
+  platforms text NOT NULL DEFAULT 'iOS',
+  ranking text,
+  icon_url text,
+  disclaimer text,
+  data_required_info text[] NOT NULL DEFAULT '{}',
+  data_required_access text[] NOT NULL DEFAULT '{}',
+  data_optional text[] NOT NULL DEFAULT '{}',
+  screenshot_url text,
+  test_method text NOT NULL,
+  test_description text NOT NULL,
+  test_open text NOT NULL,
+  test_consent text NOT NULL,
+  test_background text NOT NULL,
+  test_notes text NOT NULL,
+  summary_url text,
+  published boolean NOT NULL DEFAULT false
+);
+
+CREATE TABLE trackers (
+  id serial PRIMARY KEY,
+  name text NOT NULL,
+  display_name text NOT NULL,
+  tagline text NOT NULL,
+  categories text[] NOT NULL DEFAULT '{}',
+  connections text[] NOT NULL DEFAULT '{}',
+  collected_data text NOT NULL
+);
+
+CREATE TABLE reviews_trackers (
+  id SERIAL PRIMARY KEY,
+  review_id integer NOT NULL REFERENCES reviews(id) ON DELETE CASCADE,
+  tracker_id integer NOT NULL REFERENCES trackers(id) ON DELETE CASCADE
+);
+
+/*****************************************************/
 /************************ ROLES **********************/
 /*****************************************************/
 
@@ -191,6 +238,9 @@ CREATE USER main WITH ENCRYPTED PASSWORD '{{ main_password }}';
 GRANT SELECT, UPDATE(assigned) ON certificates TO main;
 GRANT SELECT, INSERT, UPDATE ON subscriptions TO main;
 GRANT SELECT, INSERT, UPDATE ON users TO main;
+GRANT SELECT ON trackers TO main;
+GRANT SELECT ON reviews_trackers TO main;
+GRANT SELECT ON reviews TO main;
 
 CREATE USER helper WITH ENCRYPTED PASSWORD '{{ helper_password }}';
 GRANT SELECT(user_id, cancellation_date, expiration_date) ON subscriptions TO helper;
