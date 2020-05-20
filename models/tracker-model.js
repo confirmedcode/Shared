@@ -31,7 +31,7 @@ class Tracker {
       })
       .then( result => {
         if (result.rows.length !== 1) {
-          throw new ConfirmedError(404, 99, "Review Not Found");
+          throw new ConfirmedError(404, 99, "Tracker Not Found");
         }
         return new Tracker(result.rows[0]);
       })

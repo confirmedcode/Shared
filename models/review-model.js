@@ -71,7 +71,7 @@ class Review {
       })
   }
   
-  static getAllWithoutTrackers(includeUnpublished = false) {
+  static getAll(includeUnpublished = false) {
     return Database.query(
       `SELECT * FROM reviews
       ${includeUnpublished ? '' : 'WHERE published = true' }`
@@ -86,6 +86,26 @@ class Review {
         })
         return reviews;
       })
+  }
+  
+  static getAllUsingTracker(trackerName) {
+    return Database.query(
+      `SELECT reviews.*
+        FROM reviews 
+          INNER JOIN reviews_trackers ON reviews_trackers.review_id = reviews.id
+          INNER JOIN trackers ON reviews_trackers.tracker_id = trackers.id
+        WHERE trackers.name = $1 AND published = true;`,
+      [trackerName])
+    .catch( error => {
+      throw new ConfirmedError(400, 99, "Error getting reviews by tracker", error);
+    })
+    .then( result => {
+      var reviews = [];
+      result.rows.forEach(review => {
+        reviews.push(new Review(review));
+      })
+      return reviews;
+    })
   }
   
   static deleteById(id) {

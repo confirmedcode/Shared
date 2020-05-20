@@ -129,6 +129,7 @@ class Receipt {
         }
       })
       .then( body => {
+        // console.log(JSON.stringify(body, null, 2)) // DEBUG ONLY
         if (body.status != 0) {
           if (body.hasOwnProperty("data")) {
             // don't log user receiptData if Apple returned it to us
