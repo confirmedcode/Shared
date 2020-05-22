@@ -201,8 +201,6 @@ CREATE TABLE reviews (
   icon_url text,
   disclaimer text,
   data_required_info text[] NOT NULL DEFAULT '{}',
-  data_required_access text[] NOT NULL DEFAULT '{}',
-  data_optional text[] NOT NULL DEFAULT '{}',
   screenshot_url text,
   test_method text NOT NULL,
   test_description text NOT NULL,
