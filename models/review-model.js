@@ -17,6 +17,7 @@ class Review {
     this.numTrackers = row.num_trackers;
     this.numAttempts = row.num_attempts;
     this.rating = row.rating;
+    this.ratingReason = row.rating_reason;
     this.date = new Date(row.date);
     this.displayDate = this.date.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
     this.platforms = row.platforms;
@@ -124,7 +125,7 @@ class Review {
     })
   }
   
-  static create(name, displayName, tagline, numAttempts, rating, date, platforms, ranking, iconUrl, disclaimer, dataRequiredInfo, screenshotUrl, testMethod, testDescription, testOpen, testConsent, testBackground, testNotes, summaryUrl, published, trackerNames) {
+  static create(name, displayName, tagline, numAttempts, rating, ratingReason, date, platforms, ranking, iconUrl, disclaimer, dataRequiredInfo, screenshotUrl, testMethod, testDescription, testOpen, testConsent, testBackground, testNotes, summaryUrl, published, trackerNames) {
     var review;
     var trackerIds = [];
     // check trackers exist
@@ -152,10 +153,10 @@ class Review {
       
       // made sure all trackers exist, add the review now
       return Database.query(
-        `INSERT INTO reviews(name, display_name, tagline, num_trackers, num_attempts, rating, date, platforms, ranking, icon_url, disclaimer, data_required_info, screenshot_url, test_method, test_description, test_open, test_consent, test_background, test_notes, summary_url, published)
-        VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21)
+        `INSERT INTO reviews(name, display_name, tagline, num_trackers, num_attempts, rating, rating_reason, date, platforms, ranking, icon_url, disclaimer, data_required_info, screenshot_url, test_method, test_description, test_open, test_consent, test_background, test_notes, summary_url, published)
+        VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22)
         RETURNING *`,
-        [name, displayName, tagline, trackerNames.length, numAttempts, rating, date, platforms, ranking, iconUrl, disclaimer, dataRequiredInfo, screenshotUrl, testMethod, testDescription, testOpen, testConsent, testBackground, testNotes, summaryUrl, published])
+        [name, displayName, tagline, trackerNames.length, numAttempts, rating, ratingReason, date, platforms, ranking, iconUrl, disclaimer, dataRequiredInfo, screenshotUrl, testMethod, testDescription, testOpen, testConsent, testBackground, testNotes, summaryUrl, published])
       .catch( error => {
         throw new ConfirmedError(400, 14, "Error inserting Review", error);
       })
@@ -171,7 +172,7 @@ class Review {
     
   }
   
-  static update(id, name, displayName, tagline, numAttempts, rating, date, platforms, ranking, iconUrl, disclaimer, dataRequiredInfo, screenshotUrl, testMethod, testDescription, testOpen, testConsent, testBackground, testNotes, summaryUrl, published, trackerNames) {
+  static update(id, name, displayName, tagline, numAttempts, rating, ratingReason, date, platforms, ranking, iconUrl, disclaimer, dataRequiredInfo, screenshotUrl, testMethod, testDescription, testOpen, testConsent, testBackground, testNotes, summaryUrl, published, trackerNames) {
     var review;
     var trackerIds = [];
     // check trackers exist
@@ -206,25 +207,26 @@ class Review {
               num_trackers = $5,
               num_attempts = $6,
               rating = $7,
-              date = $8,
-              platforms = $9,
-              ranking = $10,
-              icon_url = $11,
-              disclaimer = $12,
-              data_required_info = $13,
-              screenshot_url = $14,
-              test_method = $15,
-              test_description = $16,
-              test_open = $17,
-              test_consent = $18,
-              test_background = $19,
-              test_notes = $20,
-              summary_url = $21,
-              published = $22
+              rating_reason = $8,
+              date = $9,
+              platforms = $10,
+              ranking = $11,
+              icon_url = $12,
+              disclaimer = $13,
+              data_required_info = $14,
+              screenshot_url = $15,
+              test_method = $16,
+              test_description = $17,
+              test_open = $18,
+              test_consent = $19,
+              test_background = $20,
+              test_notes = $21,
+              summary_url = $22,
+              published = $23
           WHERE
             id = $1
           RETURNING *`,
-        [id, name, displayName, tagline, trackerNames.length, numAttempts, rating, date, platforms, ranking, iconUrl, disclaimer, dataRequiredInfo, screenshotUrl, testMethod, testDescription, testOpen, testConsent, testBackground, testNotes, summaryUrl, published])
+        [id, name, displayName, tagline, trackerNames.length, numAttempts, rating, ratingReason, date, platforms, ranking, iconUrl, disclaimer, dataRequiredInfo, screenshotUrl, testMethod, testDescription, testOpen, testConsent, testBackground, testNotes, summaryUrl, published])
       .catch( error => {
         throw new ConfirmedError(400, 14, "Error updating Review", error);
       })

@@ -195,6 +195,7 @@ CREATE TABLE reviews (
   num_trackers integer NOT NULL,
   num_attempts integer NOT NULL,
   rating text NOT NULL,
+  rating_reason text,
   date date NOT NULL DEFAULT now(),
   platforms text NOT NULL DEFAULT 'iOS',
   ranking text,
@@ -206,8 +207,8 @@ CREATE TABLE reviews (
   test_description text NOT NULL,
   test_open text NOT NULL,
   test_consent text NOT NULL,
-  test_background text NOT NULL,
-  test_notes text NOT NULL,
+  test_background text,
+  test_notes text,
   summary_url text,
   published boolean NOT NULL DEFAULT false
 );
