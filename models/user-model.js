@@ -40,8 +40,11 @@ class User {
     this.deleteDate = userRow.delete_date ? new Date(userRow.delete_date) : null;
     this.deleteReason = userRow.delete_reason;
     this.doNotEmail = userRow.do_not_email;
+    this.doNotEmailCode = userRow.do_not_email_code;
     this.banned = userRow.banned;
     this.lockdown = userRow.lockdown;
+    this.newsletterSubscribed = userRow.newsletter_subscribed;
+    this.newsletterUnsubscribeCode = userRow.newsletter_unsubscribe_code;
   }
   
   get email() {
@@ -918,6 +921,25 @@ class User {
       .then( result => {
         if (result.rowCount !== 1) {
           throw new ConfirmedError(400, 89, "Wrong code and/or email for email opt-out");
+        }
+        return true;
+      });
+  }
+  
+  static setNewsletterUnsubscribe(email, code) {
+    var emailHashed = Secure.hashSha512(email, EMAIL_SALT);
+    return Database.query(
+      `UPDATE users
+      SET newsletter_subscribed = false
+      WHERE email = $1 AND newsletter_unsubscribe_code = $2
+      RETURNING *`,
+      [emailHashed, code])
+      .catch( error => {
+        throw new ConfirmedError(500, 7, "Error setting newsletter unsubscribe", error);
+      })
+      .then( result => {
+        if (result.rowCount !== 1) {
+          throw new ConfirmedError(400, 89, "Wrong code and/or email for newsletter unsubscribe");
         }
         return true;
       });

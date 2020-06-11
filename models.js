@@ -1,5 +1,7 @@
 module.exports = {
   AdminUser: require("./models/admin-user-model.js"),
+  CampaignEmail: require("./models/campaign-email-model.js"),
+  Campaign: require("./models/campaign-model.js"),
   Certificate: require("./models/certificate-model.js"),
   ClientFile: require("./models/client-file-model.js"),
   Partner: require("./models/partner-model.js"),

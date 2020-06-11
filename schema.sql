@@ -70,7 +70,9 @@ CREATE TABLE users (
     banned boolean DEFAULT false NOT NULL,
     do_not_email boolean DEFAULT false NOT NULL,
     do_not_email_code text DEFAULT upper(substring(md5(random()::text) from 0 for 20)) NOT NULL,
-    lockdown boolean DEFAULT false NOT NULL
+    lockdown boolean DEFAULT false NOT NULL,
+    newsletter_subscribed boolean NOT NULL DEFAULT true,
+    newsletter_unsubscribe_code text NOT NULL DEFAULT upper("substring"(md5(random()::text), 0, 20))
 );
 
 ALTER TABLE ONLY users
@@ -228,6 +230,36 @@ CREATE TABLE reviews_trackers (
   review_id integer NOT NULL REFERENCES reviews(id) ON DELETE CASCADE,
   tracker_id integer NOT NULL REFERENCES trackers(id) ON DELETE CASCADE
 );
+
+/*****************************************************/
+/********************* CAMPAIGNS *********************/
+/*****************************************************/
+
+CREATE TABLE campaigns (
+  id SERIAL PRIMARY KEY,
+  name text NOT NULL,
+  from_address text NOT NULL,
+  subject text NOT NULL,
+  html text NOT NULL,
+  plaintext text NOT NULL,
+  create_date timestamp without time zone NOT NULL DEFAULT now(),
+  last_sent_date timestamp without time zone
+);
+
+/*****************************************************/
+/****************** CAMPAIGN EMAILS ******************/
+/*****************************************************/
+
+CREATE TABLE campaign_emails (
+  id SERIAL PRIMARY KEY,
+  campaign_id integer NOT NULL REFERENCES campaigns(id),
+  email_encrypted text NOT NULL,
+  unsubscribe_code text NOT NULL,
+  sent boolean NOT NULL DEFAULT false,
+  failed boolean NOT NULL DEFAULT false
+);
+
+CREATE UNIQUE INDEX campaign_id_email_unique ON campaign_emails(campaign_id int4_ops,email_encrypted text_ops);
 
 /*****************************************************/
 /************************ ROLES **********************/
