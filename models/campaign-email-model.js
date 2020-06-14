@@ -23,7 +23,7 @@ class CampaignEmail {
       `INSERT INTO campaign_emails (campaign_id, email_encrypted, unsubscribe_code)
         SELECT $1, email_encrypted, newsletter_unsubscribe_code
           FROM users
-          WHERE email_confirmed = true AND do_not_email = false AND lockdown = true AND newsletter_subscribed = true
+          WHERE email_encrypted IS NOT NULL AND email_confirmed = true AND do_not_email = false AND lockdown = true AND newsletter_subscribed = true
       ON CONFLICT
         DO NOTHING`,
       [campaign.id])
