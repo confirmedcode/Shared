@@ -70,11 +70,11 @@ class Review {
       })
   }
   
-  static getAll(includeUnpublished = false) {
+  static getAll(includeUnpublished = false, orderBy = "date") {
     return Database.query(
       `SELECT * FROM reviews
-      ${includeUnpublished ? '' : 'WHERE published = true' }`
-      )
+      ${includeUnpublished ? '' : 'WHERE published = true' }
+      ORDER BY ${orderBy} DESC`)
       .catch( error => {
         throw new ConfirmedError(400, 99, "Error getting reviews", error);
       })
