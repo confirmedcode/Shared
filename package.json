@@ -19,10 +19,10 @@
   "dependencies": {
     "aws-param-env": "^1.2.0",
     "aws-sdk": "^2.312.0",
-    "bcrypt": "^3.0.0",
+    "bcrypt": "^5.0.0",
     "express-rate-limit": "^3.5.0",
     "fs-extra": "^7.0.0",
-    "handlebars": "^4.5.3",
+    "handlebars": "^4.7.6",
     "klaw": "^3.0.0",
     "moment": "^2.22.2",
     "pg": "^7.4.3",
@@ -30,9 +30,9 @@
     "redis": "^2.8.0",
     "redis-mock": "^0.47.0",
     "request": "^2.88.0",
-    "request-promise": "^4.2.2",
+    "request-promise": "^4.2.5",
     "stripe": "^6.10.0",
-    "winston": "^3.1.0"
+    "winston": "^3.3.3"
   },
   "devDependencies": {}
 }
