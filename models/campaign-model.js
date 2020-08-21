@@ -98,6 +98,26 @@ class Campaign {
     });
   }
   
+  static createNonSubscribed(name, fromAddress, subject, html, plaintext) {
+    var toReturn;
+    return Database.query(
+      `INSERT INTO campaigns(name, from_address, subject, html, plaintext)
+      VALUES($1, $2, $3, $4, $5)
+      RETURNING *`,
+      [name, fromAddress, subject, html, plaintext])
+    .catch( error => {
+      throw new ConfirmedError(400, 14, "Error creating Campaign", error);
+    })
+    .then( result => {
+      toReturn = new Campaign(result.rows[0]);
+      // add all non-opted-out, non-subsribed, confirmed emails to this
+      return CampaignEmail.addLockdownNonSubscribedEmailsToCampaign(toReturn)
+    })
+    .then( result => {
+      return toReturn;
+    });
+  }
+  
 }
 
 module.exports = Campaign;
