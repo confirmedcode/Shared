@@ -7,6 +7,7 @@ const errors = require("request-promise/errors");
 const crypto = require("crypto");
 
 // Constants
+const ENVIRONMENT = process.env.ENVIRONMENT;
 const NODE_ENV = process.env.NODE_ENV;
 const IOS_SUBSCRIPTION_SECRET = process.env.IOS_SUBSCRIPTION_SECRET;
 const ITUNES_PROD_URL = "https://buy.itunes.apple.com/verifyReceipt";
@@ -17,7 +18,7 @@ const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
 const GOOGLE_PACKAGE_NAME = process.env.GOOGLE_PACKAGE_NAME;
 const GOOGLE_LICENSE_KEY = process.env.GOOGLE_LICENSE_KEY;
 const GOOGLE_OAUTH_URL = "https://accounts.google.com/o/oauth2/token";
-const TEST_ANDROID_RECEIPT_ID = "GPA.3309-8806-9773-08641";
+const TEST_ANDROID_RECEIPT_ID = "GPA.3330-7836-8005-98670";
 const TEST_IOS_RECEIPT_ID = "1000000386259702";
 const IOS_PRODUCT_ID_TO_PLAN_TYPE = {
   "TunnelsiOSUnlimitedMonthly": "ios-monthly",
@@ -39,7 +40,7 @@ const ANDROID_PRODUCT_ID_TO_PLAN_TYPE = {
 };
 
 class Receipt {
-  
+
   constructor(type, id, planType, expireDateMs, cancelDateMs, inTrial, renewEnabled, data, expirationIntentCancelled = false) {
     this.type = type;
     if (id == TEST_IOS_RECEIPT_ID && (NODE_ENV !== "test" && NODE_ENV !== "development")) {
@@ -57,14 +58,13 @@ class Receipt {
     this.data = data;
     this.expirationIntentCancelled = expirationIntentCancelled;
   }
-  
+
   static createWithStripe(stripeSubscription) {
     // Use startsWith to account for internationalization (all-monthly-GBP, all-annual-KRW, etc)
     var plan = "invalid";
     if (stripeSubscription.plan.id.startsWith("all-annual")) {
       plan = "all-annual";
-    }
-    else if (stripeSubscription.plan.id.startsWith("all-monthly")) {
+    } else if (stripeSubscription.plan.id.startsWith("all-monthly")) {
       plan = "all-monthly";
     }
     return new Receipt("stripe",
@@ -77,155 +77,146 @@ class Receipt {
       JSON.stringify(stripeSubscription),
       stripeSubscription.canceled_at != null);
   }
-  
+
   static createWithIAP(receiptData, receiptType, isIosSandbox = false, attempt = 0) {
     if (receiptData == "") {
       throw new ConfirmedError(400, 5, "Missing receipt for " + receiptType + " request");
     }
     if (receiptType == "ios") {
       return rp({
-        method: "POST",
-        uri: (isIosSandbox || NODE_ENV === "test") ? ITUNES_SANDBOX_URL : ITUNES_PROD_URL,
-        body: { 
-          "receipt-data": receiptData,
-          "password": IOS_SUBSCRIPTION_SECRET,
-          "exclude-old-transactions": true
-        },
-        json: true
-      })
-      .catch( errors.StatusCodeError, function (error) {
-        if ( error.statusCode == 503 ) {
-          if (attempt < 3) {
-            Logger.info("Got a 503 from Apple, trying again with attempt: " + attempt);
-            return Receipt.createWithIAP(receiptData, receiptType, isIosSandbox, attempt + 1);
-          }
-          else {
-            Logger.info("Got a 503 from Apple, but failed 3 times, giving up.");
-            throw new ConfirmedError(500, 10, "Error validating receipt with Apple.", error);
-          }
-        }
-        else if ( error.statusCode == 302 ) {
-          if (attempt < 3) {
-            Logger.info("Got a 302 from Apple, trying again with attempt: " + attempt);
-            return Receipt.createWithIAP(receiptData, receiptType, isIosSandbox, attempt + 1);
-          }
-          else {
-            Logger.info("Got a 302 from Apple, but failed 3 times, giving up.");
-            throw new ConfirmedError(500, 10, "Error validating receipt with Apple.", error);
-          }
-        }
-        else {
-          throw new ConfirmedError(500, 10, "Error validating receipt with Apple, unrecognized statusCode", error);
-        }
-      })
-      .catch( errors.RequestError, function(error) {
-        if (attempt < 3) {
-          Logger.info("Got a request error, trying again with attempt: " + attempt);
-          return Receipt.createWithIAP(receiptData, receiptType, isIosSandbox, attempt + 1);
-        }
-        else {
-          Logger.info("Got a request error, but failed 3 times, giving up.");
-          throw new ConfirmedError(500, 10, "Error validating receipt with Apple.", error);
-        }
-      })
-      .then( body => {
-        // console.log(JSON.stringify(body, null, 2)) // DEBUG ONLY
-        if (body.status != 0) {
-          if (body.hasOwnProperty("data")) {
-            // don't log user receiptData if Apple returned it to us
-            body.data = "";
-          }
-          if (body.status == 21007 && isIosSandbox == false) {
-            // Received a sandbox receipt when trying prod url - try again with sandbox url
-            return Receipt.createWithIAP(receiptData, receiptType, true);
-          }
-          else if (body.status == 21199 && body.is_retryable == true) {
+          method: "POST",
+          uri: (isIosSandbox || NODE_ENV === "test") ? ITUNES_SANDBOX_URL : ITUNES_PROD_URL,
+          body: {
+            "receipt-data": receiptData,
+            "password": IOS_SUBSCRIPTION_SECRET,
+            "exclude-old-transactions": true
+          },
+          json: true
+        })
+        .catch(errors.StatusCodeError, function (error) {
+          if (error.statusCode == 503) {
             if (attempt < 3) {
-              Logger.info("Got a retryable Apple error 21199, trying again with attempt: " + attempt);
+              Logger.info("Got a 503 from Apple, trying again with attempt: " + attempt);
               return Receipt.createWithIAP(receiptData, receiptType, isIosSandbox, attempt + 1);
+            } else {
+              Logger.info("Got a 503 from Apple, but failed 3 times, giving up.");
+              throw new ConfirmedError(500, 10, "Error validating receipt with Apple.", error);
             }
-            else {
-              Logger.info("Got a retryable Apple error, but failed 3 times, giving up.");
-              throw new ConfirmedError(400, 10, "Error on response from Apple for receipt verification. Status: " + body.status + " body: " + JSON.stringify(body));
+          } else if (error.statusCode == 302) {
+            if (attempt < 3) {
+              Logger.info("Got a 302 from Apple, trying again with attempt: " + attempt);
+              return Receipt.createWithIAP(receiptData, receiptType, isIosSandbox, attempt + 1);
+            } else {
+              Logger.info("Got a 302 from Apple, but failed 3 times, giving up.");
+              throw new ConfirmedError(500, 10, "Error validating receipt with Apple.", error);
             }
+          } else {
+            throw new ConfirmedError(500, 10, "Error validating receipt with Apple, unrecognized statusCode", error);
           }
-          else if (body.status == 21010 && body.is_retryable == false) {
-            throw new ConfirmedError(200, 995, "Non-retryable Apple error, payment failed. Body: " + JSON.stringify(body));
+        })
+        .catch(errors.RequestError, function (error) {
+          if (attempt < 3) {
+            Logger.info("Got a request error, trying again with attempt: " + attempt);
+            return Receipt.createWithIAP(receiptData, receiptType, isIosSandbox, attempt + 1);
+          } else {
+            Logger.info("Got a request error, but failed 3 times, giving up.");
+            throw new ConfirmedError(500, 10, "Error validating receipt with Apple.", error);
           }
-          else if (21100 <= body.status && body.status <= 21199 &&
-            (body.is_retryable == true || !body.hasOwnProperty("is_retryable"))) {
+        })
+        .then(body => {
+          // console.log(JSON.stringify(body, null, 2)) // DEBUG ONLY
+          if (body.status != 0) {
+            if (body.hasOwnProperty("data")) {
+              // don't log user receiptData if Apple returned it to us
+              body.data = "";
+            }
+            if (body.status == 21007 && isIosSandbox == false) {
+              if (ENVIRONMENT === "PROD") {
+                throw new ConfirmedError(400, 9925, "Sandbox receipts are not valid for Production");
+              } else {
+                // Received a sandbox receipt when trying prod url - try again with sandbox url
+                return Receipt.createWithIAP(receiptData, receiptType, true);
+              }
+            } else if (body.status == 21199 && body.is_retryable == true) {
+              if (attempt < 3) {
+                Logger.info("Got a retryable Apple error 21199, trying again with attempt: " + attempt);
+                return Receipt.createWithIAP(receiptData, receiptType, isIosSandbox, attempt + 1);
+              } else {
+                Logger.info("Got a retryable Apple error, but failed 3 times, giving up.");
+                throw new ConfirmedError(400, 10, "Error on response from Apple for receipt verification. Status: " + body.status + " body: " + JSON.stringify(body));
+              }
+            } else if (body.status == 21010 && body.is_retryable == false) {
+              throw new ConfirmedError(200, 995, "Non-retryable Apple error, payment failed. Body: " + JSON.stringify(body));
+            } else if (21100 <= body.status && body.status <= 21199 &&
+              (body.is_retryable == true || !body.hasOwnProperty("is_retryable"))) {
               if (attempt < 3) {
                 Logger.info("Got a potentially retryable Apple error, trying again with attempt: " + attempt + ". JSON: " + JSON.stringify(body));
                 return Receipt.createWithIAP(receiptData, receiptType, isIosSandbox, attempt + 1);
-              }
-              else {
+              } else {
                 Logger.info("Got a potentially retryable Apple error, but failed 3 times, giving up.");
                 throw new ConfirmedError(400, 10, "Error on response from Apple for receipt verification. Status: " + body.status + " body: " + JSON.stringify(body));
               }
+            } else {
+              throw new ConfirmedError(400, 10, "Error on response from Apple for receipt verification. Status: " + body.status + " body: " + JSON.stringify(body));
+            }
           }
-          else {
-            throw new ConfirmedError(400, 10, "Error on response from Apple for receipt verification. Status: " + body.status + " body: " + JSON.stringify(body));
+
+          if (!body.hasOwnProperty("latest_receipt_info") || body.latest_receipt_info.length == 0) {
+            throw new ConfirmedError(400, 9, "No subscription found in iOS receipt", body);
           }
-        }
-	
-        if (!body.hasOwnProperty("latest_receipt_info") || body.latest_receipt_info.length == 0) {
-          throw new ConfirmedError(400, 9, "No subscription found in iOS receipt", body);
-        }
-        // choose the receipt with the latest expiration date
-        var latestExpirationIndex = 0
-        var latestExpirationMs = 0;
-        for (var index = 0; index < body.latest_receipt_info.length; index++) {
-          if (body.latest_receipt_info[index].hasOwnProperty("expires_date_ms") && body.latest_receipt_info[index].expires_date_ms > latestExpirationMs) {
-            latestExpirationIndex = index;
-            latestExpirationMs = body.latest_receipt_info[index].expires_date_ms
+          // choose the receipt with the latest expiration date
+          var latestExpirationIndex = 0
+          var latestExpirationMs = 0;
+          for (var index = 0; index < body.latest_receipt_info.length; index++) {
+            if (body.latest_receipt_info[index].hasOwnProperty("expires_date_ms") && body.latest_receipt_info[index].expires_date_ms > latestExpirationMs) {
+              latestExpirationIndex = index;
+              latestExpirationMs = body.latest_receipt_info[index].expires_date_ms
+            }
           }
-        }
-        var latestReceiptInfo = body.latest_receipt_info[latestExpirationIndex];
-	
-        if (!body.hasOwnProperty("pending_renewal_info") || body.pending_renewal_info.length == 0) {
-          throw new ConfirmedError(400, 9, "iOS subscription receipt missing pending_renewal_info", body);
-        }
-        var pendingRenewalInfo = body.pending_renewal_info[0];
-	
-        if (!latestReceiptInfo.hasOwnProperty("original_transaction_id")) {
-          throw new ConfirmedError(400, 9, "iOS subscription receipt missing original_transaction_id", body);
-        }
-        var planType = IOS_PRODUCT_ID_TO_PLAN_TYPE[latestReceiptInfo.product_id];
-        if (planType == null) {
-          throw new ConfirmedError(400, 49, "Unrecognized product ID from iOS receipt: " + latestReceiptInfo.product_id, body);
-        }
-        if (!latestReceiptInfo.hasOwnProperty("expires_date_ms")) {
-          throw new ConfirmedError(400, 9, "iOS subscription receipt missing expires_date_ms", body);
-        }
-        if (!latestReceiptInfo.hasOwnProperty("is_trial_period")) {
-          throw new ConfirmedError(400, 9, "iOS subscription receipt missing is_trial_period", body);
-        }
-        if (!pendingRenewalInfo.hasOwnProperty("auto_renew_status")) {
-          throw new ConfirmedError(400, 9, "iOS subscription receipt pending_renewal_info missing auto_renew_status", body);
-        }
-        if (!body.hasOwnProperty("latest_receipt")) {
-          throw new ConfirmedError(400, 9, "iOS subscription receipt missing latest_receipt", body);
-        }
-        return new Receipt("ios",
-          latestReceiptInfo.original_transaction_id,
-          planType,
-          latestReceiptInfo.expires_date_ms,
-          latestReceiptInfo.cancellation_date_ms,
-          latestReceiptInfo.is_trial_period,
-          pendingRenewalInfo.auto_renew_status == 1 ? true : false,
-          body.latest_receipt,
-          pendingRenewalInfo.expiration_intent == 1 ? true : false);
-      });
-    }
-    else if (receiptType == "android") {
+          var latestReceiptInfo = body.latest_receipt_info[latestExpirationIndex];
+
+          if (!body.hasOwnProperty("pending_renewal_info") || body.pending_renewal_info.length == 0) {
+            throw new ConfirmedError(400, 9, "iOS subscription receipt missing pending_renewal_info", body);
+          }
+          var pendingRenewalInfo = body.pending_renewal_info[0];
+
+          if (!latestReceiptInfo.hasOwnProperty("original_transaction_id")) {
+            throw new ConfirmedError(400, 9, "iOS subscription receipt missing original_transaction_id", body);
+          }
+          var planType = IOS_PRODUCT_ID_TO_PLAN_TYPE[latestReceiptInfo.product_id];
+          if (planType == null) {
+            throw new ConfirmedError(400, 49, "Unrecognized product ID from iOS receipt: " + latestReceiptInfo.product_id, body);
+          }
+          if (!latestReceiptInfo.hasOwnProperty("expires_date_ms")) {
+            throw new ConfirmedError(400, 9, "iOS subscription receipt missing expires_date_ms", body);
+          }
+          if (!latestReceiptInfo.hasOwnProperty("is_trial_period")) {
+            throw new ConfirmedError(400, 9, "iOS subscription receipt missing is_trial_period", body);
+          }
+          if (!pendingRenewalInfo.hasOwnProperty("auto_renew_status")) {
+            throw new ConfirmedError(400, 9, "iOS subscription receipt pending_renewal_info missing auto_renew_status", body);
+          }
+          if (!body.hasOwnProperty("latest_receipt")) {
+            throw new ConfirmedError(400, 9, "iOS subscription receipt missing latest_receipt", body);
+          }
+          return new Receipt("ios",
+            latestReceiptInfo.original_transaction_id,
+            planType,
+            latestReceiptInfo.expires_date_ms,
+            latestReceiptInfo.cancellation_date_ms,
+            latestReceiptInfo.is_trial_period,
+            pendingRenewalInfo.auto_renew_status == 1 ? true : false,
+            body.latest_receipt,
+            pendingRenewalInfo.expiration_intent == 1 ? true : false);
+        });
+    } else if (receiptType == "android") {
       // decode the base64 from receiptData, extract fields, validate fields
       var receiptDecoded = null;
       var receipt = null;
       try {
         receiptDecoded = Buffer.from(receiptData, "base64").toString("utf-8");
         receipt = JSON.parse(receiptDecoded);
-      }
-      catch (error) {
+      } catch (error) {
         throw new ConfirmedError(400, 65, "Unable to decode Android base64 receipt sent from client", error);
       }
       if (receiptDecoded == null || receipt == null) {
@@ -260,103 +251,98 @@ class Receipt {
       if (planType == null) {
         throw new ConfirmedError(400, 68, "Invalid android productId: " + purchaseData["productId"]);
       }
-		
+
       // Get validated details from Google Play API
       // get a new access token using the refresh token
       return rp({
-        method: "POST",
-        uri: GOOGLE_OAUTH_URL,
-        formData: { 
-          "grant_type": "refresh_token",
-          "client_id": GOOGLE_CLIENT_ID,
-          "client_secret": GOOGLE_CLIENT_SECRET,
-          "refresh_token": GOOGLE_REFRESH_TOKEN
-        },
-        json: true
-      })
-      .catch( error => {
-        throw new ConfirmedError(500, 61, "Error getting access_token from Google with refresh_token", error);
-      })
-      .then( body => {
-        // use access token to get user subscription with purchase_token
-        let access_token = body.access_token;
-        return rp({
-          method: "GET",
-          uri: "https://www.googleapis.com/androidpublisher/v3/applications/"
-          + GOOGLE_PACKAGE_NAME + "/purchases/subscriptions/" 
-          + productId + "/tokens/"
-          + purchaseToken
-          + "?access_token=" + access_token,
+          method: "POST",
+          uri: GOOGLE_OAUTH_URL,
+          formData: {
+            "grant_type": "refresh_token",
+            "client_id": GOOGLE_CLIENT_ID,
+            "client_secret": GOOGLE_CLIENT_SECRET,
+            "refresh_token": GOOGLE_REFRESH_TOKEN
+          },
           json: true
-        });
-      })
-      .catch( errors.StatusCodeError, function (error) {
-        if ( error.statusCode == 503 ) {
+        })
+        .catch(error => {
+          throw new ConfirmedError(500, 61, "Error getting access_token from Google with refresh_token", error);
+        })
+        .then(body => {
+          // use access token to get user subscription with purchase_token
+          let access_token = body.access_token;
+          return rp({
+            method: "GET",
+            uri: "https://www.googleapis.com/androidpublisher/v3/applications/" +
+              GOOGLE_PACKAGE_NAME + "/purchases/subscriptions/" +
+              productId + "/tokens/" +
+              purchaseToken +
+              "?access_token=" + access_token,
+            json: true
+          });
+        })
+        .catch(errors.StatusCodeError, function (error) {
+          if (error.statusCode == 503) {
+            if (attempt < 3) {
+              console.log("Got a 503 from Google, trying again with attempt: " + attempt);
+              return Receipt.createWithIAP(receiptData, receiptType, isIosSandbox, attempt + 1);
+            } else {
+              console.log("Got a 503 from Google, but failed 3 times, giving up.");
+              throw new ConfirmedError(500, 1002, "Error validating receipt with Google", error.stack);
+            }
+          } else if (error.statusCode == 410) {
+            throw new ConfirmedError(200, 62, "Invalid purchase token.", error.stack);
+          } else {
+            throw new ConfirmedError(500, 621, "Error validating receipt with Google - unrecognized status code", error.stack)
+          }
+        })
+        .catch(errors.RequestError, function (error) {
           if (attempt < 3) {
-            console.log("Got a 503 from Google, trying again with attempt: " + attempt);
+            console.log("Got a request error, trying again with attempt: " + attempt + " error: " + JSON.stringify(error));
             return Receipt.createWithIAP(receiptData, receiptType, isIosSandbox, attempt + 1);
+          } else {
+            console.log("Got a request error, but failed 3 times, giving up.");
+            throw new ConfirmedError(500, 620, "Error validating receipt with Google", error.stack);
           }
-          else {
-            console.log("Got a 503 from Google, but failed 3 times, giving up.");
-  			    throw new ConfirmedError(500, 1002, "Error validating receipt with Google", error.stack);
+        })
+        .then(body => {
+          if (body.paymentState == 0) {
+            Logger.info("Android payment not received - still pending: " + purchaseData.orderId);
+            // This flag is ambiguous from Google Play. Log but don't throw error because update of subscription expiration date should catch non-payment cases anyway.
+            //throw new ConfirmedError(400, 67, "Android payment not received - still pending");
           }
-        }
-        else if ( error.statusCode == 410 ) {
-          throw new ConfirmedError(200, 62, "Invalid purchase token.", error.stack);
-        }
-        else {
-          throw new ConfirmedError(500, 621, "Error validating receipt with Google - unrecognized status code", error.stack)
-        }
-    	})
-      .catch( errors.RequestError, function(error) {
-        if (attempt < 3) {
-          console.log("Got a request error, trying again with attempt: " + attempt + " error: " + JSON.stringify(error));
-          return Receipt.createWithIAP(receiptData, receiptType, isIosSandbox, attempt + 1);
-        }
-        else {
-          console.log("Got a request error, but failed 3 times, giving up.");
-  		    throw new ConfirmedError(500, 620, "Error validating receipt with Google", error.stack);
-        }
-    	})
-      .then(body => {
-        if (body.paymentState == 0) {
-          Logger.info("Android payment not received - still pending: " + purchaseData.orderId);
-          // This flag is ambiguous from Google Play. Log but don't throw error because update of subscription expiration date should catch non-payment cases anyway.
-          //throw new ConfirmedError(400, 67, "Android payment not received - still pending");
-        }
-        if (!body.hasOwnProperty("startTimeMillis")) {
-          throw new ConfirmedError(400, 66, "Missing field startTimeMillis in android receipt");
-        }
-        if (!body.hasOwnProperty("expiryTimeMillis")) {
-          throw new ConfirmedError(400, 66, "Missing field expiryTimeMillis in android receipt");
-        }
-        if (!body.hasOwnProperty("autoRenewing")) {
-          throw new ConfirmedError(400, 66, "Missing field autoRenewing in android receipt");
-        }
-        if (!body.hasOwnProperty("orderId")) {
-          throw new ConfirmedError(400, 66, "Missing field orderId in android receipt");
-        }
-        if (body.orderId.split("..")[0] != purchaseData.orderId) {
-          throw new ConfirmedError(400, 69, "OrderId in client receipt and Google verified receipt do not match");
-        }
-        return new Receipt("android",
-          purchaseData.orderId,
-          planType,
-          body.expiryTimeMillis,
-          body.userCancellationTimeMillis,
-          body.paymentState == 2,
-          body.autoRenewing,
-          receiptData,
-          body.hasOwnProperty("cancelReason") && body.cancelReason == 0
-        );
-      });
+          if (!body.hasOwnProperty("startTimeMillis")) {
+            throw new ConfirmedError(400, 66, "Missing field startTimeMillis in android receipt");
+          }
+          if (!body.hasOwnProperty("expiryTimeMillis")) {
+            throw new ConfirmedError(400, 66, "Missing field expiryTimeMillis in android receipt");
+          }
+          if (!body.hasOwnProperty("autoRenewing")) {
+            throw new ConfirmedError(400, 66, "Missing field autoRenewing in android receipt");
+          }
+          if (!body.hasOwnProperty("orderId")) {
+            throw new ConfirmedError(400, 66, "Missing field orderId in android receipt");
+          }
+          if (body.orderId.split("..")[0] != purchaseData.orderId) {
+            throw new ConfirmedError(400, 69, "OrderId in client receipt and Google verified receipt do not match");
+          }
+          return new Receipt("android",
+            purchaseData.orderId,
+            planType,
+            body.expiryTimeMillis,
+            body.userCancellationTimeMillis,
+            body.paymentState == 2,
+            body.autoRenewing,
+            receiptData,
+            body.hasOwnProperty("cancelReason") && body.cancelReason == 0
+          );
+        });
 
-    }
-    else {
+    } else {
       throw new ConfirmedError(400, 11, "Invalid IAP receipt type: " + receiptType);
-    }	
+    }
   }
-  
+
 }
 
 function verifyAndroidReceipt(publicKey, signedData, signature) {
