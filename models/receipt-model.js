@@ -115,8 +115,14 @@ class Receipt {
           }
         })
         .catch(errors.RequestError, function (error) {
-          if (attempt < 3) {
+          if (attempt < 10) {
             Logger.info("Got a request error, trying again with attempt: " + attempt);
+            if (error != nil) {
+              Logger.info(error)
+              if (error.cause != nil) {
+                Logger.info(error.cause)
+              }
+            }
             return Receipt.createWithIAP(receiptData, receiptType, isIosSandbox, attempt + 1);
           } else {
             Logger.info("Got a request error, but failed 3 times, giving up.");
