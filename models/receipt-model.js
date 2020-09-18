@@ -118,7 +118,9 @@ class Receipt {
           if (attempt < 10) {
             Logger.info("Got a request error, trying again with attempt: " + attempt);
             if (error != null) {
-              Logger.info(error)
+              if (error.name != null) {
+                Logger.info(error.name)
+              }
               if (error.cause != null) {
                 Logger.info(error.cause)
               }
