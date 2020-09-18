@@ -117,9 +117,9 @@ class Receipt {
         .catch(errors.RequestError, function (error) {
           if (attempt < 10) {
             Logger.info("Got a request error, trying again with attempt: " + attempt);
-            if (error != nil) {
+            if (error != null) {
               Logger.info(error)
-              if (error.cause != nil) {
+              if (error.cause != null) {
                 Logger.info(error.cause)
               }
             }
