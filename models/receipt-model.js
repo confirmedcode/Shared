@@ -111,9 +111,7 @@ class Receipt {
               throw new ConfirmedError(500, 10, "Error validating receipt with Apple.", error);
             }
           } else {
-            Logger.info("Apple outage error")
-            // continue while apple has outage
-            // throw new ConfirmedError(500, 10, "Error validating receipt with Apple, unrecognized statusCode", error);
+            throw new ConfirmedError(500, 10, "Error validating receipt with Apple, unrecognized statusCode", error);
           }
         })
         .catch(errors.RequestError, function (error) {
