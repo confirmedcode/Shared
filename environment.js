@@ -10,6 +10,7 @@ const PARAMS_MAP = {
   "COMMON": [
     "DOMAIN",
     "LD_DOMAIN",
+    "LD_NEW_DOMAIN",
     "CLIENT_BUCKET",
     "SURICATA_BUCKET",
     "SPEED_TEST_BUCKET",
@@ -73,12 +74,11 @@ const PARAMS_MAP = {
 function initializeEnvironment(paramPaths) {
   if (NODE_ENV === "production") {
     paramPaths.forEach((paramPath) => {
-      awsParamEnv.load( "/" + ENVIRONMENT + "/" + paramPath);
+      awsParamEnv.load("/" + ENVIRONMENT + "/" + paramPath);
     });
-  }
-  else if (ENVIRONMENT !== "LOCAL") {
+  } else if (ENVIRONMENT !== "LOCAL") {
     paramPaths.forEach((paramPath) => {
-      awsParamEnv.load( "/" + ENVIRONMENT + "/TEST/" + paramPath);
+      awsParamEnv.load("/" + ENVIRONMENT + "/TEST/" + paramPath);
     });
   }
   // Double check that all required environment variables are loaded
