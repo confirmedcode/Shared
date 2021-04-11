@@ -19,7 +19,7 @@
   "dependencies": {
     "aws-param-env": "^1.2.0",
     "aws-sdk": "^2.716.0",
-    "bcrypt": "^5.0.0",
+    "bcrypt": "^5.0.1",
     "express-rate-limit": "^3.5.3",
     "fs-extra": "^7.0.1",
     "handlebars": "^4.7.6",
