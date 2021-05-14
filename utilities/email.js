@@ -236,7 +236,7 @@ function send(fromAddress, toAddress, subject, templateName, parameters) {
       return getCompiledEmail(`${templateName}.txt`, parameters);
     })
     .then(result => {
-      text = result + "\n--\nEmail Opt-Out: " + "${optOutLink}";
+      text = result + "\n--\nEmail Opt-Out: " + `${optOutLink}`;
       if (doNotEmail == true) {
         Logger.info(`Account has do_not_email set to true, not emailing.`);
         return Promise.resolve("email");
