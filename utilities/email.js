@@ -233,7 +233,7 @@ function send(fromAddress, toAddress, subject, templateName, parameters) {
     })
     .then(result => {
       html = result + `<div style="width=100%; text-align:center;"><a href="${optOutLink}" style="font-size: 10px; text-decoration: underline; color: gray;">Email Opt-Out</a></div>`;
-      return getCompiledEmail(`${templateName}.txt`, parameters);
+      return getCompiledEmailText(`${templateName}.txt`, parameters);
     })
     .then(result => {
       text = result + "\n--\nEmail Opt-Out: " + `${optOutLink}`;
@@ -314,6 +314,17 @@ function getCompiledEmail(filename, parameters) {
   return fs.readFile(path.join(__dirname, "..", "emails", filename), "utf-8")
     .then(conf => {
       var template = handlebars.compile(conf);
+      return template(parameters);
+    })
+    .catch(error => {
+      throw new ConfirmedError(500, 56, "Error getting file", error);
+    });
+}
+
+function getCompiledEmailText(filename, parameters) {
+  return fs.readFile(path.join(__dirname, "..", "emails", filename), "utf-8")
+    .then(conf => {
+      var template = handlebars.compile(conf, { noEscape: true });
       return template(parameters);
     })
     .catch(error => {
