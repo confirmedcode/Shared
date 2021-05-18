@@ -64,8 +64,8 @@ class Source {
   static getUnassignedCertificatesCount(id) {
     // Show what user owns the "/sources" directory
     try {
-      const stats = fs.statSync(SOURCES_DIR)
-      Logger.info("Owner of sources dir is uid: " + stats.uid)
+      const stats = fs.statSync(path.join(SOURCES_DIR, id))
+      Logger.info("Owner of sources id dir is uid: " + stats.uid)
     } catch (error) {
       Logger.error(error)
     }
