@@ -22,7 +22,7 @@ const SOURCE_OPENSSL_CONF_PATH = path.join(".", "templates", "openssl-source.cnf
 const CURRENT_SOURCE_ID_PARAMETER_PATH = "/" + ENVIRONMENT + "/COMMON/CURRENT_SOURCE_ID";
 
 class Source {
-  
+
   constructor(id, createDate, isCurrent) {
     this.id = id;
     this.isCurrent = isCurrent;
@@ -45,7 +45,7 @@ class Source {
       });
     }
   }
-  
+
   static setCurrent(id) {
     if (ENVIRONMENT === "LOCAL") {
       return Promise.resolve();
@@ -60,20 +60,27 @@ class Source {
       });
     }
   }
-  
+
   static getUnassignedCertificatesCount(id) {
+    // Show what user owns the "/sources" directory
+    try {
+      const stats = fs.statSync(SOURCES_DIR)
+      Logger.info("Owner of sources dir is uid: " + stats.uid)
+    } catch (error) {
+      Logger.error(error)
+    }
     return Database.query(
       `SELECT count(*) FROM certificates
       WHERE assigned=false AND source_id=$1`,
       [id])
       .catch( error => {
-        throw new ConfirmedError(500, 26, "Error getting unassigned certificates count: " + error); 
+        throw new ConfirmedError(500, 26, "Error getting unassigned certificates count: " + error);
       })
       .then( result => {
         return result.rows[0].count;
       });
   }
-  
+
   static getSources() {
     return module.exports.getCurrentSourceId()
       .then(currentSourceId => {
@@ -92,7 +99,7 @@ class Source {
           });
       });
   }
-  
+
   static getServerCertificate(id) {
     const newSourceDir = path.join(SOURCES_DIR, id);
     const caDir = path.join(newSourceDir, "ca");
@@ -122,12 +129,12 @@ class Source {
       throw new ConfirmedError(500, 99, "Unable to get Server Certificate: " + error);
     });
   }
-  
+
   static generateCertificates(sourceId, num) {
     module.exports.generateCertificate(sourceId, 0, num);
     return true;
   }
-  
+
   static generateCertificate(sourceId, count, total) {
     if (count >= total) {
       Logger.info("Certificate generation complete.");
@@ -254,7 +261,7 @@ class Source {
       Logger.error("Error creating certificate: " + error);
     });
   }
-  
+
   static createWithId(id) {
     const newSourceDir = path.resolve(path.join(SOURCES_DIR, id));
     const opensslConfFile = path.join(newSourceDir, "openssl.cnf");
@@ -369,7 +376,7 @@ class Source {
       Logger.error("Error creating source: " + error);
     });
   }
-  
+
 }
 
 function getSourceDirectories() {
