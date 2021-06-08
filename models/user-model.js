@@ -15,7 +15,7 @@ const AES_EMAIL_KEY = process.env.AES_EMAIL_KEY;
 const EMAIL_SALT = process.env.EMAIL_SALT;
 
 class User {
-  
+
   constructor(userRow, accessDeleted = false) {
     if (!userRow) {
       throw new ConfirmedError(500, 999, "Error creating user: Null user.");
@@ -46,7 +46,7 @@ class User {
     this.newsletterSubscribed = userRow.newsletter_subscribed;
     this.newsletterUnsubscribeCode = userRow.newsletter_unsubscribe_code;
   }
-  
+
   get email() {
     if (this.emailEncrypted) {
       return Secure.aesDecrypt(this.emailEncrypted, AES_EMAIL_KEY);
@@ -55,7 +55,7 @@ class User {
       return null;
     }
   }
-  
+
   getStripeCurrency() {
     if (this.stripeId) {
       return Stripe.getCustomer(this.stripeId)
@@ -67,7 +67,7 @@ class User {
       return Promise.resolve(null);
     }
   }
-  
+
   getActiveReferrals() {
     return Database.query(
       `SELECT
@@ -85,10 +85,10 @@ class User {
     	AND
     	  cancellation_date IS NULL
       AND
-        expiration_date > to_timestamp($2)`,      
+        expiration_date > to_timestamp($2)`,
       [this.id, Date.now()/1000])
       .catch( error => {
-        throw new ConfirmedError(500, 26, "Error getting referrals for user", error); 
+        throw new ConfirmedError(500, 26, "Error getting referrals for user", error);
       })
       .then( result => {
         var referrals = {
@@ -117,7 +117,7 @@ class User {
         return referrals;
       });
   }
-  
+
   delete(reason, banned) {
     var promise = new Promise((resolve, reject) => {
       resolve("No stripeid for customer");
@@ -154,14 +154,14 @@ class User {
     .catch(error => {
       throw new ConfirmedError(500, 31, "Error deleting user", error);
     })
-    .then(result => { 
+    .then(result => {
       if (result.rowCount !== 1) {
         throw new ConfirmedError(400, 31, "Error deleting user: did not delete id: " + this.id);
       }
       return true;
     });
   }
-  
+
   getPaymentMethods() {
     if (this.stripeId) {
       return Stripe.getPaymentMethods(this.stripeId);
@@ -170,7 +170,7 @@ class User {
       return Promise.resolve([]);
     }
   }
-  
+
   updateWithStripe(stripeSubscription) {
     var receipt = Receipt.createWithStripe(stripeSubscription);
     return Subscription.updateWithUserAndReceipt(this, receipt)
@@ -178,7 +178,7 @@ class User {
         return this;
       });
   }
-  
+
   changePassword(currentPassword, newPassword) {
     return this.assertPassword(currentPassword)
       .then( passwordMatches => {
@@ -186,7 +186,7 @@ class User {
       })
       .then(newPasswordHashed => {
         return Database.query(
-          `UPDATE users 
+          `UPDATE users
           SET password = $1
           WHERE id = $2
           RETURNING *`,
@@ -202,7 +202,7 @@ class User {
         });
       });
   }
-  
+
   createStripeCustomer(source) {
     // if already has one, then don't create
     if (this.stripeId != null) {
@@ -233,7 +233,7 @@ class User {
         return stripeCustomer;
       });
   }
-  
+
   createStripeSubscription(source, plan, trial, browserLocale, paramLocale, is3ds) {
     return Stripe.hasSource(this.stripeId, source)
     .then( hasSource => {
@@ -261,52 +261,52 @@ class User {
     });
     return p;
   }
-  
+
   getKey(platform) {
     return this.getActiveSubscriptions()
       .then(activeSubscriptions => {
         if ( activeSubscriptions.length === 0 ) {
           throw new ConfirmedError(200, 6, "No active subscriptions");
         }
-        // check that we have the correct plan for the key being requested
-        var hasAllSub = false;
-        var hasAndroidSub = false;
-        var hasIosSub = false;
-        activeSubscriptions.forEach((activeSubscription) => {
-          var planType = activeSubscription.planType;
-          if (planType == "all-monthly" || planType == "all-annual") {
-            hasAllSub = true;
-            hasAndroidSub = true;
-            hasIosSub = true;
-          }
-          if (planType == "android-monthly" || planType == "android-annual" ) {
-            hasAndroidSub = true;
-          }
-          if (planType == "ios-monthly" || planType == "ios-annual" ) {
-            hasIosSub = true;
-          }
-        });
-        // Get the latest non-revoked serial so we can retrive the correct key
-        switch (platform) {
-          case "mac":
-          case "windows":
-            if (!hasAllSub) {
-              throw new ConfirmedError(400, 38, "Requested Mac/Windows, but doesn't have desktop subscription");
-            }
-            break;
-          case "ios":
-            if (!hasIosSub) {
-              throw new ConfirmedError(400, 52, "Requested iOS, but doesn't have iOS or desktop subscription");
-            }
-            break;
-          case "android":
-            if (!hasAndroidSub) {
-              throw new ConfirmedError(400, 51, "Requested Android, but doesn't have Android or desktop subscription");
-            }
-            break;
-          default:
-            throw new ConfirmedError(400, 51, "Invalid platform");
-        }
+        // // check that we have the correct plan for the key being requested
+        // var hasAllSub = false;
+        // var hasAndroidSub = false;
+        // var hasIosSub = false;
+        // activeSubscriptions.forEach((activeSubscription) => {
+        //   var planType = activeSubscription.planType;
+        //   if (planType == "all-monthly" || planType == "all-annual") {
+        //     hasAllSub = true;
+        //     hasAndroidSub = true;
+        //     hasIosSub = true;
+        //   }
+        //   if (planType == "android-monthly" || planType == "android-annual" ) {
+        //     hasAndroidSub = true;
+        //   }
+        //   if (planType == "ios-monthly" || planType == "ios-annual" ) {
+        //     hasIosSub = true;
+        //   }
+        // });
+        // // Get the latest non-revoked serial so we can retrive the correct key
+        // switch (platform) {
+        //   case "mac":
+        //   case "windows":
+        //     if (!hasAllSub) {
+        //       throw new ConfirmedError(400, 38, "Requested Mac/Windows, but doesn't have desktop subscription");
+        //     }
+        //     break;
+        //   case "ios":
+        //     if (!hasIosSub) {
+        //       throw new ConfirmedError(400, 52, "Requested iOS, but doesn't have iOS or desktop subscription");
+        //     }
+        //     break;
+        //   case "android":
+        //     if (!hasAndroidSub) {
+        //       throw new ConfirmedError(400, 51, "Requested Android, but doesn't have Android or desktop subscription");
+        //     }
+        //     break;
+        //   default:
+        //     throw new ConfirmedError(400, 51, "Invalid platform");
+        // }
         return Certificate.getCurrentActiveWithUserId(this.id)
         .then(certificate => {
           return {
@@ -316,14 +316,14 @@ class User {
         });
     });
   }
-  
+
   getSubscriptions( filtered = false ) {
     return Database.query(
       `SELECT * FROM subscriptions
       WHERE user_id=$1`,
       [this.id])
       .catch( error => {
-        throw new ConfirmedError(500, 26, "Error getting subscriptions", error); 
+        throw new ConfirmedError(500, 26, "Error getting subscriptions", error);
       })
       .then( result => {
         var subscriptions = [];
@@ -333,7 +333,7 @@ class User {
         return subscriptions;
       });
   }
-  
+
   getActiveSubscriptions( filtered = false ) {
     return Database.query(
       `SELECT * FROM subscriptions
@@ -343,7 +343,7 @@ class User {
         expiration_date > to_timestamp($2)`,
       [this.id, Date.now()/1000])
       .catch( error => {
-        throw new ConfirmedError(500, 26, "Error getting active subscriptions", error); 
+        throw new ConfirmedError(500, 26, "Error getting active subscriptions", error);
       })
       .then( result => {
         var subscriptions = [];
@@ -353,7 +353,7 @@ class User {
         return subscriptions;
       });
   }
-  
+
   getActiveProSubscriptions( filtered = false ) {
     return Database.query(
       `SELECT * FROM subscriptions
@@ -364,7 +364,7 @@ class User {
         (plan_type = 'all-monthly' OR plan_type = 'all-annual')`,
       [this.id, Date.now()/1000])
       .catch( error => {
-        throw new ConfirmedError(500, 26, "Error getting active pro subscriptions", error); 
+        throw new ConfirmedError(500, 26, "Error getting active pro subscriptions", error);
       })
       .then( result => {
         var subscriptions = [];
@@ -374,7 +374,7 @@ class User {
         return subscriptions;
       });
   }
-  
+
   cancelSubscriptionWithReceiptId(receiptId) {
     var subscription;
     return Subscription.getWithUserAndReceiptId(this, receiptId)
@@ -389,7 +389,7 @@ class User {
     //   return subscription.sendCancellationEmail();
     // });
   }
-  
+
   convertShadowUser(newEmail, newPassword) {
     return User.failIfEmailTaken(newEmail)
       .then(success => {
@@ -399,9 +399,9 @@ class User {
         const emailEncrypted = Secure.aesEncrypt(newEmail, AES_EMAIL_KEY);
         const newEmailHashed = Secure.hashSha512(newEmail, EMAIL_SALT);
         return Database.query(
-          `UPDATE users 
+          `UPDATE users
           SET email = $1, email_encrypted = $2, password = $3
-          WHERE id = $4 
+          WHERE id = $4
           RETURNING *`,
           [newEmailHashed, emailEncrypted, newPasswordHashed, this.id])
         .catch( error => {
@@ -412,7 +412,7 @@ class User {
         });
       });
   }
-  
+
   changeEmail(newEmail) {
     if (this.emailConfirmed !== true) {
       throw new ConfirmedError(400, 110, "Can't change email on user without confirmed email.");
@@ -422,7 +422,7 @@ class User {
       .then(success => {
         const newEmailHashed = Secure.hashSha512(newEmail, EMAIL_SALT);
         return Database.query(
-          `UPDATE users 
+          `UPDATE users
           SET change_email = $1, email_confirm_code = $2
           WHERE id = $3
           RETURNING *`,
@@ -435,11 +435,11 @@ class User {
         });
       });
   }
-  
+
   assertPassword(password) {
     return Secure.assertPassword(this.passwordHashed, password);
   }
-  
+
   static getReferrerUserId(referCode) {
     return Database.query(
       `SELECT id
@@ -457,7 +457,7 @@ class User {
         return result.rows[0].id;
       })
   }
-  
+
   static createWithEmailAndPassword(email, password, browser = false, referrerUserId, lockdown = false) {
     return User.failIfEmailTaken(email)
       .then( success => {
@@ -482,7 +482,7 @@ class User {
         return user;
       });
   }
-  
+
   static getWithIdAndPassword(id, password) {
     return module.exports.getWithId(id)
       .then( user => {
@@ -492,7 +492,7 @@ class User {
           });
       });
   }
-  
+
   static getWithId(id, columns = "*", accessDeleted = false) {
     return Database.query(
       `SELECT ${columns} FROM users
@@ -509,7 +509,7 @@ class User {
         return new User(result.rows[0], accessDeleted);
       });
   }
-  
+
   static getWithEmail(email, columns = "*", accessDeleted = false) {
     var emailHashed = Secure.hashSha512(email, EMAIL_SALT);
     return Database.query(
@@ -527,7 +527,7 @@ class User {
         return new User(result.rows[0], accessDeleted);
       });
   }
-  
+
   static getWithStripeId(stripeId, columns = "*") {
     return Database.query(
       `SELECT ${columns} FROM users
@@ -548,7 +548,7 @@ class User {
         }
       });
   }
-  
+
   static getWithEmailAndPassword(email, password) {
     var emailHashed = Secure.hashSha512(email, EMAIL_SALT);
     return Database.query(
@@ -571,7 +571,7 @@ class User {
           });
       });
   }
-  
+
   static getWithIAPReceipt(receiptData, receiptType, partnerCampaign = null) {
     return Receipt.createWithIAP(receiptData, receiptType)
       .then( receipt => {
@@ -613,7 +613,7 @@ class User {
           });
       });
   }
-  
+
   static confirmChangeEmail(code, email) {
     const emailHashed = Secure.hashSha512(email, EMAIL_SALT);
     const emailEncrypted = Secure.aesEncrypt(email, AES_EMAIL_KEY);
@@ -633,7 +633,7 @@ class User {
       var user = new User(result.rows[0]);
       // Confirm the email - update database
       return Database.query(
-        `UPDATE users 
+        `UPDATE users
         SET email = $1, email_encrypted = $2, change_email = NULL
         WHERE email_confirm_code = $3 AND
           change_email = $1
@@ -678,7 +678,7 @@ class User {
           return Certificate.getUnassigned()
           .then(certificate => {
             return Database.query(
-              `UPDATE users 
+              `UPDATE users
               SET id = $1
               WHERE email = $2
               RETURNING *`,
@@ -699,8 +699,8 @@ class User {
       // Confirm the email - update database as confirmed
       return toReturn.then(() => {
         return Database.query(
-          `UPDATE users 
-          SET email_confirmed = true 
+          `UPDATE users
+          SET email_confirmed = true
           WHERE email_confirm_code = $1 AND
             email_confirmed = false AND
             email = $2
@@ -718,7 +718,7 @@ class User {
       });
     });
   }
-  
+
   static failIfEmailTaken(email) {
     var emailHashed = Secure.hashSha512(email, EMAIL_SALT);
     return Database.query(
@@ -742,7 +742,7 @@ class User {
         return emailHashed;
       });
   }
-  
+
   static resendConfirmCode(email, lockdown = false) {
     var emailHashed = Secure.hashSha512(email, EMAIL_SALT);
     return Database.query(
@@ -767,7 +767,7 @@ class User {
         }
       });
   }
-  
+
   static generatePasswordReset(email, lockdown = false) {
     var emailHashed = Secure.hashSha512(email, EMAIL_SALT);
     var passwordResetCode = Secure.generatePasswordResetCode();
@@ -790,12 +790,12 @@ class User {
         }
       });
   }
-  
+
   static resetPassword(code, newPassword) {
     return Secure.hashPassword(newPassword)
       .then(newPasswordHashed => {
         return Database.query(
-          `UPDATE users 
+          `UPDATE users
           SET password = $1,
             password_reset_code = NULL
           WHERE password_reset_code = $2
@@ -812,7 +812,7 @@ class User {
         return true;
       });
   }
-  
+
   static hasActiveSubscription(id) {
     return Database.query(
       `SELECT COUNT(*) AS cnt FROM subscriptions
@@ -822,7 +822,7 @@ class User {
          expiration_date > to_timestamp($2)`,
        [id, Date.now()/1000])
     .catch( error => {
-      throw new ConfirmedError(500, 26, "Error checking if a user id has an active subscription", error); 
+      throw new ConfirmedError(500, 26, "Error checking if a user id has an active subscription", error);
     })
     .then( result => {
       var count = result.rows[0].cnt;
@@ -834,7 +834,7 @@ class User {
       }
     });
   }
-  
+
   static getMonthlyUsage(id) {
     return Database.query(
       `SELECT month_usage_megabytes, month_usage_update FROM users
@@ -860,10 +860,10 @@ class User {
         }
       })
       .catch( error => {
-        throw new ConfirmedError(500, 26, "Error getting monthly usage", error); 
+        throw new ConfirmedError(500, 26, "Error getting monthly usage", error);
       });
   }
-  
+
   static updateUserUsageById(id, usage) {
     //Logger.info("updating userid: " + id + " usage: " + usage);
     return Database.query(
@@ -906,7 +906,7 @@ class User {
         }
       });
   }
-  
+
   static setDoNotEmail(email, code) {
     var emailHashed = Secure.hashSha512(email, EMAIL_SALT);
     return Database.query(
@@ -925,7 +925,7 @@ class User {
         return true;
       });
   }
-  
+
   static setNewsletterUnsubscribe(email, code) {
     var emailHashed = Secure.hashSha512(email, EMAIL_SALT);
     return Database.query(
@@ -944,7 +944,7 @@ class User {
         return true;
       });
   }
-  
+
 }
 
 module.exports = User;
