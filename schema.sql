@@ -44,7 +44,7 @@ CREATE TABLE certificates (
 CREATE INDEX user_id_index ON certificates USING btree (user_id);
 
 CREATE INDEX unassigned_index ON certificates USING btree (assigned, source_id);
-    
+
 /*****************************************************/
 /*********************** USERS ***********************/
 /*****************************************************/
@@ -80,7 +80,7 @@ ALTER TABLE ONLY users
 
 ALTER TABLE ONLY users
     ADD CONSTRAINT users_id_key UNIQUE (id);
-    
+
 /*****************************************************/
 /******************* ADMIN USERS *******************/
 /*****************************************************/
@@ -95,7 +95,7 @@ CREATE TABLE admin_users (
 
 ALTER TABLE ONLY admin_users
     ADD CONSTRAINT admin_users_email_pkey PRIMARY KEY (email);
-    
+
 /*****************************************************/
 /******************* SUPPORT USERS *******************/
 /*****************************************************/
@@ -182,7 +182,7 @@ ALTER TABLE ONLY subscriptions
 
 ALTER TABLE ONLY subscriptions
     ADD CONSTRAINT subscriptions_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id) ON UPDATE CASCADE;
-    
+
 CREATE INDEX subscriptions_user_id_index ON subscriptions USING btree (user_id);
 
 /*****************************************************/
@@ -285,6 +285,12 @@ GRANT SELECT, UPDATE ON subscriptions TO renewer;
 CREATE USER support WITH ENCRYPTED PASSWORD '{{ support_password }}';
 GRANT SELECT(id, email, email_encrypted, stripe_id, create_date, referred_by, delete_date, delete_reason, banned, month_usage_megabytes, month_usage_update, email_confirmed, do_not_email, do_not_email_code) ON users TO support;
 GRANT SELECT ON subscriptions TO support;
+GRANT USAGE, SELECT ON SEQUENCE trackers_id_seq TO support;
+GRANT SELECT, UPDATE, INSERT ON trackers TO support;
+GRANT USAGE, SELECT ON SEQUENCE reviews_trackers_id_seq TO support;
+GRANT SELECT, UPDATE, INSERT, DELETE ON reviews_trackers TO support;
+GRANT USAGE, SELECT ON SEQUENCE reviews_id_seq TO support;
+GRANT SELECT, UPDATE, INSERT ON reviews TO support;
 GRANT SELECT, UPDATE, INSERT ON support_users TO support;
 
 CREATE USER partner WITH ENCRYPTED PASSWORD '{{ partner_password }}';
