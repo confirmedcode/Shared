@@ -14,12 +14,11 @@ const pool = new Pool({
   user: PG_USER,
   password: PG_PASSWORD,
   port: 5432,
-  ssl: process.env.ENVIRONMENT === "LOCAL" ? false : true,
+  ssl: process.env.ENVIRONMENT === "LOCAL" ? false : { rejectUnauthorized: false },
   max: 20,
   min: 4,
   idleTimeoutMillis: 1000,
-  connectionTimeoutMillis: 10000,
-  rejectUnauthorized: false
+  connectionTimeoutMillis: 10000
 });
 
 pool.on('error', (error, c) => {
