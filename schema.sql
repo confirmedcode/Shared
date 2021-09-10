@@ -284,6 +284,8 @@ GRANT SELECT, UPDATE ON subscriptions TO renewer;
 
 CREATE USER support WITH ENCRYPTED PASSWORD '{{ support_password }}';
 GRANT SELECT(id, email, email_encrypted, stripe_id, create_date, referred_by, delete_date, delete_reason, banned, month_usage_megabytes, month_usage_update, email_confirmed, do_not_email, do_not_email_code) ON users TO support;
+GRANT UPDATE ON users TO support;
+GRANT DELETE ON subscriptions TO support;
 GRANT SELECT ON subscriptions TO support;
 GRANT USAGE, SELECT ON SEQUENCE trackers_id_seq TO support;
 GRANT SELECT, UPDATE, INSERT ON trackers TO support;
