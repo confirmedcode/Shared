@@ -5,7 +5,7 @@ const Logger = require("../logger.js");
 const Database = require("../utilities/database.js");
 
 class Campaign {
-  
+
   constructor(row) {
     if (!row) {
       throw new ConfirmedError(400, 999, "Error creating campaign: Null row.");
@@ -19,7 +19,7 @@ class Campaign {
     this.createDate = new Date(row.create_date);
     this.lastSentDate = row.last_sent_date ? new Date(row.last_sent_date) : null
   }
-  
+
   static getById(id) {
     return Database.query(
       `SELECT *
@@ -37,7 +37,7 @@ class Campaign {
       return new Campaign(result.rows[0]);
     });
   }
-  
+
   static getStats(id) {
     return Database.query(
       `SELECT count(*) AS total,
@@ -61,10 +61,10 @@ class Campaign {
       }
     });
   }
-  
+
   static getAll() {
     return Database.query(
-      `SELECT * FROM campaigns`
+      `SELECT * FROM campaigns ORDER BY ID DESC`
       )
       .catch( error => {
         throw new ConfirmedError(400, 99, "Error getting campaigns", error);
@@ -77,7 +77,7 @@ class Campaign {
         return campaigns;
       })
   }
-  
+
   static create(name, fromAddress, subject, html, plaintext) {
     var toReturn;
     return Database.query(
@@ -97,7 +97,7 @@ class Campaign {
       return toReturn;
     });
   }
-  
+
   static createNonSubscribed(name, fromAddress, subject, html, plaintext) {
     var toReturn;
     return Database.query(
@@ -117,7 +117,7 @@ class Campaign {
       return toReturn;
     });
   }
-  
+
 }
 
 module.exports = Campaign;
