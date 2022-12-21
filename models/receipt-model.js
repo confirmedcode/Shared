@@ -21,6 +21,7 @@ const GOOGLE_OAUTH_URL = "https://accounts.google.com/o/oauth2/token";
 const TEST_ANDROID_RECEIPT_ID = "GPA.3330-7836-8005-98670";
 const TEST_IOS_RECEIPT_ID = "1000000386259702";
 const IOS_PRODUCT_ID_TO_PLAN_TYPE = {
+  "LockdownProAnnualLTO": "all-annual",
   "TunnelsiOSUnlimitedMonthly": "ios-monthly",
   "TunnelsiOSUnlimited": "ios-annual",
   "UnlimitedTunnels": "all-monthly",
