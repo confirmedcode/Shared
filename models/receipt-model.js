@@ -145,7 +145,7 @@ class Receipt {
               } else {
                 // Received a sandbox receipt when trying prod url - try again with sandbox url
                 return Receipt.createWithIAP(receiptData, receiptType, true);
-              }
+                }
             } else if (body.status == 21199 && body.is_retryable == true) {
               if (attempt < 3) {
                 Logger.info("Got a retryable Apple error 21199, trying again with attempt: " + attempt);
