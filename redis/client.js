@@ -7,15 +7,16 @@ const ENVIRONMENT = process.env.ENVIRONMENT;
 const NODE_ENV = process.env.NODE_ENV;
 const REDIS_HOST = process.env.REDIS_HOST;
 const REDIS_PASSWORD = process.env.REDIS_PASSWORD;
+const IS_MOCK_REDIS = process.env.IS_MOCK_REDIS;
 
 var redisClient;
 
-if (NODE_ENV == "production" || ENVIRONMENT === "LOCAL") {
+if (NODE_ENV === "production" || ENVIRONMENT === "LOCAL" && !IS_MOCK_REDIS) {
   redisClient = Redis.createClient({
     host: REDIS_HOST,
     port: 6379,
     password: REDIS_PASSWORD,
-    tls: (ENVIRONMENT == "LOCAL" ? undefined : {}),
+    tls: (ENVIRONMENT === "LOCAL" ? undefined : {}),
     retryStrategy: function (options) {
         if (options.error && options.error.code === "ECONNREFUSED") {
             // End reconnecting on a specific error and flush all commands with
@@ -35,8 +36,7 @@ if (NODE_ENV == "production" || ENVIRONMENT === "LOCAL") {
         return Math.min(options.attempt * 100, 3000);
     }
   });
-}
-else {
+} else {
   redisClient = require("redis-mock").createClient();
 }
 

@@ -21,6 +21,7 @@ const GOOGLE_OAUTH_URL = "https://accounts.google.com/o/oauth2/token";
 const TEST_ANDROID_RECEIPT_ID = "GPA.3330-7836-8005-98670";
 const TEST_IOS_RECEIPT_ID = "1000000386259702";
 const IOS_PRODUCT_ID_TO_PLAN_TYPE = {
+  "LockdownProAnnualLTO": "all-annual",
   "TunnelsiOSUnlimitedMonthly": "ios-monthly",
   "TunnelsiOSUnlimited": "ios-annual",
   "UnlimitedTunnels": "all-monthly",
@@ -139,12 +140,12 @@ class Receipt {
               body.data = "";
             }
             if (body.status == 21007 && isIosSandbox == false) {
-              if (ENVIRONMENT === "PROD") {
-                throw new ConfirmedError(400, 9925, "Sandbox receipts are not valid for Production");
-              } else {
+              // if (ENVIRONMENT === "PROD") {
+//                 throw new ConfirmedError(400, 9925, "Sandbox receipts are not valid for Production");
+//               } else {
                 // Received a sandbox receipt when trying prod url - try again with sandbox url
                 return Receipt.createWithIAP(receiptData, receiptType, true);
-              }
+                //}
             } else if (body.status == 21199 && body.is_retryable == true) {
               if (attempt < 3) {
                 Logger.info("Got a retryable Apple error 21199, trying again with attempt: " + attempt);
