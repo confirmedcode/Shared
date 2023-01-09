@@ -32,6 +32,25 @@ class CampaignEmail {
       });
   }
 
+  static addLockdownSubscribedEmailsToCampaign(campaign) {
+    return Database.query(
+        `INSERT INTO campaign_emails (campaign_id, email_encrypted, unsubscribe_code)
+          SELECT $1, email_encrypted, newsletter_unsubscribe_code
+            FROM users
+            WHERE email_encrypted IS NOT NULL 
+                AND email_confirmed = true 
+                AND do_not_email = false AND lockdown = true AND newsletter_subscribed = true
+                AND users.id IN (
+                  SELECT user_id FROM subscriptions
+                    WHERE cancellation_date IS NULL AND expiration_date > now() )
+         ON CONFLICT
+            DO NOTHING`,
+        [campaign.id])
+        .catch(error => {
+          throw new ConfirmedError(400, 99, "Error adding lockdown subscribed emails to campaign", error);
+        });
+  }
+
   static addLockdownNonSubscribedEmailsToCampaign(campaign) {
     return Database.query(
         `INSERT INTO campaign_emails (campaign_id, email_encrypted, unsubscribe_code)
@@ -47,6 +66,47 @@ class CampaignEmail {
       .catch(error => {
         throw new ConfirmedError(400, 99, "Error adding lockdown non-subscribed emails to campaign", error);
       });
+  }
+  static addLockdownCancelledSubscriptionEmailsToCampaign(campaign) {
+    return Database.query(
+        `INSERT INTO campaign_emails (campaign_id, email_encrypted, unsubscribe_code)
+          SELECT $1, email_encrypted, newsletter_unsubscribe_code
+            FROM users
+            WHERE email_encrypted IS NOT NULL 
+              AND email_confirmed = true 
+              AND do_not_email = false 
+              AND lockdown = true 
+              AND newsletter_subscribed = true
+              AND users.id IN (
+                SELECT user_id FROM subscriptions
+                  WHERE cancellation_date IS NOT NULL OR expiration_date < now() )
+           ON CONFLICT
+              DO NOTHING`,
+        [campaign.id])
+        .catch(error => {
+          throw new ConfirmedError(400, 99, "Error adding lockdown cancelled/lapsed emails to campaign", error);
+        });
+  }
+
+  static addLockdownNeverSubscribedEmailsToCampaign(campaign) {
+    return Database.query(
+        `INSERT INTO campaign_emails (campaign_id, email_encrypted, unsubscribe_code)
+          SELECT $1, email_encrypted, newsletter_unsubscribe_code
+            FROM users
+              LEFT JOIN subscriptions
+                ON subscriptions.user_id = users.id
+                WHERE subscriptions.user_id IS NULL 
+                AND email_encrypted IS NOT NULL 
+                AND email_confirmed = true 
+                AND do_not_email = false 
+                AND lockdown = true 
+                AND newsletter_subscribed = true
+           ON CONFLICT
+              DO NOTHING`,
+        [campaign.id])
+        .catch(error => {
+          throw new ConfirmedError(400, 99, "Error adding never subscribed emails to campaign", error);
+        });
   }
 
   static getUnsentEmailsAndMarkAsSent(campaignId, maxNum) {
