@@ -20,36 +20,52 @@ if (ENVIRONMENT === "DEVELOPMENT") {
 }
 const ONE_DAY_SECONDS = 86400;
 const PLANS = {
+  "ios-fw-monthly": {
+    isAll: false,
+    name: "Firewall iOS Plan - Monthly",
+    description: "Premium Firewall subscription for iOS.",
+  },
+  "ios-fw-annual": {
+    isAll: false,
+    name: "Firewall iOS Plan - Annual",
+    description: "Premium Firewall subscription for iOS.",
+  },
   "all-annual": {
     isAll: true,
     name: "Pro Plan - Annual",
-    description: "Unlimited VPN for Windows, Mac, iOS, and Android, with a maximum of five (5) devices connected simultaneously."
+    description:
+      "Unlimited VPN for Windows, Mac, iOS, and Android, with a maximum of five (5) devices connected simultaneously.",
   },
   "all-monthly": {
     isAll: true,
     name: "Pro Plan - Monthly",
-    description: "Unlimited VPN for Windows, Mac, iOS, and Android, with a maximum of five (5) devices connected simultaneously."
+    description:
+      "Unlimited VPN for Windows, Mac, iOS, and Android, with a maximum of five (5) devices connected simultaneously.",
   },
   "ios-annual": {
     isAll: false,
     name: "iOS Plan - Annual",
-    description: "Unlimited VPN for iPad and iPhone, with a maximum of three (3) devices connected simultaneously."
+    description:
+      "Unlimited VPN for iPad and iPhone, with a maximum of three (3) devices connected simultaneously.",
   },
   "ios-monthly": {
     isAll: false,
     name: "iOS Plan - Monthly",
-    description: "Unlimited VPN for iPad and iPhone, with a maximum of three (3) devices connected simultaneously."
+    description:
+      "Unlimited VPN for iPad and iPhone, with a maximum of three (3) devices connected simultaneously.",
   },
   "android-annual": {
     isAll: false,
     name: "Android Plan - Annual",
-    description: "Unlimited VPN for Android tablets and phones, with a maximum of three (3) devices connected simultaneously."
+    description:
+      "Unlimited VPN for Android tablets and phones, with a maximum of three (3) devices connected simultaneously.",
   },
   "android-monthly": {
     isAll: false,
     name: "Android Plan - Monthly",
-    description: "Unlimited VPN for Android tablets and phones, with a maximum of three (3) devices connected simultaneously."
-  }
+    description:
+      "Unlimited VPN for Android tablets and phones, with a maximum of three (3) devices connected simultaneously.",
+  },
 };
 
 class Subscription {

@@ -29,7 +29,9 @@ const IOS_PRODUCT_ID_TO_PLAN_TYPE = {
   "LockdowniOSVpnMonthly": "ios-monthly",
   "LockdowniOSVpnAnnual": "ios-annual",
   "LockdowniOSVpnMonthlyPro": "all-monthly",
-  "LockdowniOSVpnAnnualPro": "all-annual"
+  "LockdowniOSVpnAnnualPro": "all-annual",
+  "LockdowniOSFirewallMonthly": "ios-fw-monthly",
+  "LockdowniOSFirewallAnnual": "ios-fw-annual"
 };
 const ANDROID_PRODUCT_ID_TO_PLAN_TYPE = {
   "paid_sub": "android-monthly",
