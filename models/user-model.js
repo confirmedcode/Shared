@@ -263,7 +263,7 @@ class User {
   }
 
   getKey(platform) {
-    return this.getActiveSubscriptions()
+    return this.getActiveVPNSubscriptions()
       .then(activeSubscriptions => {
         if ( activeSubscriptions.length === 0 ) {
           throw new ConfirmedError(200, 6, "No active subscriptions");
@@ -328,6 +328,56 @@ class User {
       .then( result => {
         var subscriptions = [];
         result.rows.forEach(row => {
+          subscriptions.push(new Subscription(row, filtered));
+        });
+        return subscriptions;
+      });
+  }
+
+    getActiveSubscriptions( filtered = false ) {
+    return Database.query(
+      `SELECT * FROM subscriptions
+      WHERE
+        user_id=$1 AND
+        cancellation_date IS NULL AND
+        expiration_date > to_timestamp($2)`,
+      [this.id, Date.now()/1000])
+      .catch( error => {
+        throw new ConfirmedError(500, 26, "Error getting active subscriptions", error);
+      })
+      .then( result => {
+        var subscriptions = [];
+        result.rows.forEach(row => {
+          subscriptions.push(new Subscription(row, filtered));
+        });
+        return subscriptions;
+      });
+    }
+  
+  getActiveVPNSubscriptions( filtered = false ) {
+    return Database.query(
+      `SELECT * FROM subscriptions
+      WHERE
+        user_id=$1 AND
+        cancellation_date IS NULL AND
+        expiration_date > to_timestamp($2)
+        AND
+        plan_type != 'ios-fw-monthly'
+        AND
+        plan_type != 'ios-fw-annual'`,
+      [this.id, Date.now() / 1000]
+    )
+      .catch((error) => {
+        throw new ConfirmedError(
+          500,
+          26,
+          "Error getting active VPN subscriptions",
+          error
+        );
+      })
+      .then((result) => {
+        var subscriptions = [];
+        result.rows.forEach((row) => {
           subscriptions.push(new Subscription(row, filtered));
         });
         return subscriptions;
