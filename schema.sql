@@ -17,7 +17,9 @@ CREATE TYPE plan_type AS ENUM (
     'all-monthly',
     'all-annual',
     'android-monthly',
-    'android-annual'
+    'android-annual',
+    'ios-fw-monthly',
+    'ios-fw-annual'
 );
 
 CREATE TYPE receipt_type AS ENUM (
