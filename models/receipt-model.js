@@ -31,7 +31,11 @@ const IOS_PRODUCT_ID_TO_PLAN_TYPE = {
   "LockdowniOSVpnMonthlyPro": "all-monthly",
   "LockdowniOSVpnAnnualPro": "all-annual",
   "LockdowniOSFirewallMonthly": "ios-fw-monthly",
-  "LockdowniOSFirewallAnnual": "ios-fw-annual"
+  "LockdowniOSFirewallAnnual": "ios-fw-annual",
+  "lockdown.yearly.40.202408.no_trial.4hrs_offer_": "ios-annual",
+  "lockdown.yearly.40.202408.3_days_free_trial.4hrs_offer": "ios-annual",
+  "lockdown.weekly.1.202408.3_days_free_trial.4hrs_offer": "ios-weekly",
+  "lockdown.weekly.1.202408.no_trial.4hrs_offer": "ios-weekly"
 };
 const ANDROID_PRODUCT_ID_TO_PLAN_TYPE = {
   "paid_sub": "android-monthly",

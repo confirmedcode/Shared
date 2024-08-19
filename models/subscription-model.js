@@ -54,6 +54,12 @@ const PLANS = {
     description:
       "Unlimited VPN for iPad and iPhone, with a maximum of three (3) devices connected simultaneously.",
   },
+  "ios-weekly": {
+    isAll: false,
+    name: "iOS Plan - Weekly",
+    description:
+      "Unlimited VPN for iPad and iPhone, with a maximum of three (3) devices connected simultaneously.",
+  },
   "android-annual": {
     isAll: false,
     name: "Android Plan - Annual",

@@ -3,6 +3,7 @@ const Logger = require("../logger.js");
 
 // Constants
 const PLAN_TO_ESTIMATED_REVENUE = {
+  "ios-weekly": 0.99,
   "ios-monthly": 4.99,
   "ios-annual": 49.99,
   "all-monthly": 9.99,

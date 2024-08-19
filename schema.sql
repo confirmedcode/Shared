@@ -12,6 +12,7 @@ CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
 SET search_path = public, pg_catalog;
 
 CREATE TYPE plan_type AS ENUM (
+    'ios-weekly',
     'ios-monthly',
     'ios-annual',
     'all-monthly',
