@@ -37,6 +37,7 @@ const IOS_PRODUCT_ID_TO_PLAN_TYPE = {
   "lockdown.yearly.40.202409.no_trial.feedback": "ios-annual",
   "lockdown.yearly.30.202411.1_year_no_trial.4h_screen_bf": "ios-annual",
   "lockdown.yearly.30.202412.1_year_no_trial.4h_screen_holiday": "ios-annual",
+  "lockdown.yearly.30.202501.1_year_no_trial.4h_screen_newyear": "ios-annual",
   "lockdown.weekly.1.202408.3_days_free_trial.4hrs_offer": "ios-weekly",
   "lockdown.weekly.1.202408.no_trial.4hrs_offer": "ios-weekly",
   "lockdown.weekly.1.202409.no_trial.feedback": "ios-weekly",
