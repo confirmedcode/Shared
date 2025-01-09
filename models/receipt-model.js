@@ -182,7 +182,7 @@ class Receipt {
           }
 
           if (!body.hasOwnProperty("latest_receipt_info") || body.latest_receipt_info.length == 0) {
-            Logger.error("missing latest_receipt_info:" + JSON.stringify(body));
+            Logger.error("missing latest_receipt_info:" + JSON.stringify(body) + "receipt: " + receiptData);
             throw new ConfirmedError(400, 9, "No subscription found in iOS receipt", body);
           }
           // choose the receipt with the latest expiration date
